@@ -1180,6 +1180,13 @@ async function handleWardrobePhotoSelected(e) {
   }
 }
 
+function wardrobeOption(profile, category) {
+  const items = (profile.wardrobe || []).filter((item) => item.category === category);
+  if (items.length === 0) return null;
+  const item = pickRandom(items);
+  return { text: `${item.style} · ${item.color}`, fromWardrobe: true };
+}
+
 function buildOutfitTable(profile, w) {
   const table = OUTFIT_TABLE[profile.styleType];
   if (!table) return null;
@@ -1190,13 +1197,15 @@ function buildOutfitTable(profile, w) {
     ? "cold"
     : "mild";
 
-  const top = { text: pickRandom(table.top[tempGroup]), fromWardrobe: false };
-  const bottom = { text: pickRandom(table.bottom), fromWardrobe: false };
-  const socks = { text: pickRandom(table.socks), fromWardrobe: false };
-  let shoesText = pickRandom(table.shoes);
+  const top = wardrobeOption(profile, "top") || { text: pickRandom(table.top[tempGroup]), fromWardrobe: false };
+  const bottom = wardrobeOption(profile, "bottom") || { text: pickRandom(table.bottom), fromWardrobe: false };
+  const socks = wardrobeOption(profile, "socks") || { text: pickRandom(table.socks), fromWardrobe: false };
+
+  const shoesOption = wardrobeOption(profile, "shoes") || { text: pickRandom(table.shoes), fromWardrobe: false };
+  let shoesText = shoesOption.text;
   if (w.isRainy) shoesText += " (방수 소재 추천)";
   if (w.isSnowy) shoesText += " (미끄럼 방지 밑창 추천)";
-  const shoes = { text: shoesText, fromWardrobe: false };
+  const shoes = { text: shoesText, fromWardrobe: shoesOption.fromWardrobe };
 
   return { top, bottom, socks, shoes };
 }
