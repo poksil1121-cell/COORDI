@@ -1012,3 +1012,10 @@ main { flex: 1; padding: 8px 20px 40px; }
   color: var(--ink-faint);
   line-height: 1.5;
 }
+
+.btn-outfit-refresh {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}

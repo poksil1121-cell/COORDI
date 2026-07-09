@@ -497,6 +497,12 @@ function bindDashboardEvents() {
   el("evidenceModal").addEventListener("click", (e) => {
     if (e.target.id === "evidenceModal") closeEvidenceModal();
   });
+
+  el("outfitTableRefreshBtn").addEventListener("click", () => {
+    if (!lastWeather) return;
+    const table = buildOutfitTable(profile, lastWeather);
+    renderOutfitTable(el("outfitTableBody"), table);
+  });
 }
 
 async function showDashboard() {
@@ -980,48 +986,80 @@ function styleOutfitHint(profile) {
 
 const OUTFIT_TABLE = {
   casual: {
-    top: { hot: "루즈핏 반팔 티셔츠 · 화이트/베이지", mild: "오버사이즈 스웨트셔츠 · 그레이", cold: "후드 집업 + 히트텍 이너 · 네이비" },
-    bottom: "스트레이트 데님 팬츠 · 블루",
-    socks: "무지 크루 삭스 · 화이트",
-    shoes: "캔버스 스니커즈 · 화이트",
+    top: {
+      hot: ["루즈핏 반팔 티셔츠 · 화이트", "그래픽 반팔 티셔츠 · 베이지"],
+      mild: ["오버사이즈 스웨트셔츠 · 그레이", "체크 셔츠 · 레드"],
+      cold: ["후드 집업 + 히트텍 이너 · 네이비", "무스탕 자켓 · 브라운"],
+    },
+    bottom: ["스트레이트 데님 팬츠 · 블루", "와이드 치노 팬츠 · 베이지"],
+    socks: ["무지 크루 삭스 · 화이트", "스트라이프 삭스 · 네이비"],
+    shoes: ["캔버스 스니커즈 · 화이트", "로우탑 스니커즈 · 블랙"],
   },
   minimal: {
-    top: { hot: "무지 반팔 티셔츠 · 오프화이트", mild: "라운드넥 니트 · 그레이", cold: "울 코트 + 터틀넥 · 차콜" },
-    bottom: "테이퍼드 슬랙스 · 블랙",
-    socks: "발목 삭스 · 블랙",
-    shoes: "미니멀 로퍼 · 블랙",
+    top: {
+      hot: ["무지 반팔 티셔츠 · 오프화이트", "리브 니트 탱크 + 셔츠 · 그레이"],
+      mild: ["라운드넥 니트 · 그레이", "심플 셋업 재킷 · 베이지"],
+      cold: ["울 코트 + 터틀넥 · 차콜", "롱 니트 가디건 · 아이보리"],
+    },
+    bottom: ["테이퍼드 슬랙스 · 블랙", "스트레이트 슬랙스 · 그레이"],
+    socks: ["발목 삭스 · 블랙", "무지 크루 삭스 · 화이트"],
+    shoes: ["미니멀 로퍼 · 블랙", "화이트 스니커즈 · 화이트"],
   },
   street: {
-    top: { hot: "그래픽 반팔 티셔츠 · 블랙", mild: "오버사이즈 후드 + 워크자켓 · 카키", cold: "패딩 아우터 + 후드 레이어드 · 블랙" },
-    bottom: "와이드 카고 팬츠 · 카키",
-    socks: "로고 크루 삭스 · 화이트",
-    shoes: "청키 스니커즈 · 화이트/블랙",
+    top: {
+      hot: ["그래픽 반팔 티셔츠 · 블랙", "박시 반팔 · 화이트"],
+      mild: ["오버사이즈 후드 + 워크자켓 · 카키", "빅사이즈 체크셔츠 · 레드"],
+      cold: ["패딩 아우터 + 후드 레이어드 · 블랙", "롱패딩 + 그래픽 후드 · 카키"],
+    },
+    bottom: ["와이드 카고 팬츠 · 카키", "배기 데님 팬츠 · 블루"],
+    socks: ["로고 크루 삭스 · 화이트", "레터링 삭스 · 블랙"],
+    shoes: ["청키 스니커즈 · 화이트/블랙", "하이탑 스니커즈 · 블랙"],
   },
   feminine: {
-    top: { hot: "프릴 블라우스 · 라이트핑크", mild: "니트 가디건 + 슬립 원피스 · 아이보리", cold: "울 코트 + 니트 레이어드 · 베이지" },
-    bottom: "플레어 스커트 · 라벤더",
-    socks: "레이스 삭스 · 화이트",
-    shoes: "메리제인 플랫 · 베이지",
+    top: {
+      hot: ["프릴 블라우스 · 라이트핑크", "레이스 반팔 탑 · 화이트"],
+      mild: ["니트 가디건 + 슬립 원피스 · 아이보리", "퍼프소매 블라우스 · 라벤더"],
+      cold: ["울 코트 + 니트 레이어드 · 베이지", "무스탕 코트 · 아이보리"],
+    },
+    bottom: ["플레어 스커트 · 라벤더", "롱 플리츠 스커트 · 베이지"],
+    socks: ["레이스 삭스 · 화이트", "리본 삭스 · 아이보리"],
+    shoes: ["메리제인 플랫 · 베이지", "리본 플랫슈즈 · 화이트"],
   },
   classic: {
-    top: { hot: "린넨 셔츠 · 라이트블루", mild: "브이넥 니트 + 셔츠 레이어드 · 네이비", cold: "울 코트 + 셔츠 · 그레이" },
-    bottom: "슬랙스 · 차콜",
-    socks: "발목 삭스 · 네이비",
-    shoes: "로퍼 · 브라운",
+    top: {
+      hot: ["린넨 셔츠 · 라이트블루", "피케 카라 티셔츠 · 네이비"],
+      mild: ["브이넥 니트 + 셔츠 레이어드 · 네이비", "트위드 재킷 · 그레이"],
+      cold: ["울 코트 + 셔츠 · 그레이", "캐시미어 코트 · 차콜"],
+    },
+    bottom: ["슬랙스 · 차콜", "테일러드 팬츠 · 네이비"],
+    socks: ["발목 삭스 · 네이비", "무지 삭스 · 그레이"],
+    shoes: ["로퍼 · 브라운", "더비 슈즈 · 블랙"],
   },
   sporty: {
-    top: { hot: "드라이핏 반팔 티셔츠 · 블랙", mild: "트레이닝 재킷 · 네이비/화이트", cold: "플리스 집업 + 패딩 베스트 · 블랙" },
-    bottom: "조거 팬츠 · 블랙",
-    socks: "스포츠 크루 삭스 · 화이트",
-    shoes: "러닝화 · 화이트/네온",
+    top: {
+      hot: ["드라이핏 반팔 티셔츠 · 블랙", "메시 반팔 저지 · 네온"],
+      mild: ["트레이닝 재킷 · 네이비/화이트", "후디 · 그레이"],
+      cold: ["플리스 집업 + 패딩 베스트 · 블랙", "롱패딩 스포츠 라인 · 네이비"],
+    },
+    bottom: ["조거 팬츠 · 블랙", "트랙 팬츠 · 네이비"],
+    socks: ["스포츠 크루 삭스 · 화이트", "쿠셔닝 삭스 · 블랙"],
+    shoes: ["러닝화 · 화이트/네온", "트레이닝화 · 블랙"],
   },
   vintage: {
-    top: { hot: "레트로 스트라이프 반팔 · 브라운톤", mild: "체크 니트 베스트 + 셔츠 · 머스타드", cold: "코듀로이 자켓 · 카멜" },
-    bottom: "와이드 코듀로이 팬츠 · 브라운",
-    socks: "레트로 스트라이프 삭스 · 크림",
-    shoes: "로퍼 또는 첼시부츠 · 브라운",
+    top: {
+      hot: ["레트로 스트라이프 반팔 · 브라운톤", "하와이안 셔츠 · 그린"],
+      mild: ["체크 니트 베스트 + 셔츠 · 머스타드", "코듀로이 셔츠 · 브라운"],
+      cold: ["코듀로이 자켓 · 카멜", "빈티지 무스탕 · 브라운"],
+    },
+    bottom: ["와이드 코듀로이 팬츠 · 브라운", "스트레이트 진 · 워시블루"],
+    socks: ["레트로 스트라이프 삭스 · 크림", "무지 울 삭스 · 브라운"],
+    shoes: ["로퍼 또는 첼시부츠 · 브라운", "레트로 러닝화 · 크림"],
   },
 };
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 function buildOutfitTable(profile, w) {
   const table = OUTFIT_TABLE[profile.styleType];
@@ -1033,16 +1071,15 @@ function buildOutfitTable(profile, w) {
     ? "cold"
     : "mild";
 
-  let shoes = table.shoes;
-  if (w.isRainy) shoes += " (방수 소재 추천)";
-  if (w.isSnowy) shoes += " (미끄럼 방지 밑창 추천)";
+  const top = { text: pickRandom(table.top[tempGroup]), fromWardrobe: false };
+  const bottom = { text: pickRandom(table.bottom), fromWardrobe: false };
+  const socks = { text: pickRandom(table.socks), fromWardrobe: false };
+  let shoesText = pickRandom(table.shoes);
+  if (w.isRainy) shoesText += " (방수 소재 추천)";
+  if (w.isSnowy) shoesText += " (미끄럼 방지 밑창 추천)";
+  const shoes = { text: shoesText, fromWardrobe: false };
 
-  return {
-    top: table.top[tempGroup],
-    bottom: table.bottom,
-    socks: table.socks,
-    shoes,
-  };
+  return { top, bottom, socks, shoes };
 }
 
 function buildOutfitRec(profile, w) {
@@ -1096,16 +1133,21 @@ function renderRecommendationCards(rules) {
 }
 
 function renderOutfitTable(container, table) {
+  const refreshBtn = el("outfitTableRefreshBtn");
   if (!table) {
     container.innerHTML = `<p class="empty-note">직접 입력한 스타일의 조합표는 아직 준비 중이에요.</p>`;
+    if (refreshBtn) refreshBtn.hidden = true;
     return;
   }
-  container.innerHTML = `
-    <div class="outfit-table-row"><span class="outfit-table-label">상의</span><span>${table.top}</span></div>
-    <div class="outfit-table-row"><span class="outfit-table-label">하의</span><span>${table.bottom}</span></div>
-    <div class="outfit-table-row"><span class="outfit-table-label">양말</span><span>${table.socks}</span></div>
-    <div class="outfit-table-row"><span class="outfit-table-label">신발</span><span>${table.shoes}</span></div>
+  if (refreshBtn) refreshBtn.hidden = false;
+
+  const row = (label, entry) => `
+    <div class="outfit-table-row">
+      <span class="outfit-table-label">${label}</span>
+      <span>${entry.text}${entry.fromWardrobe ? ' <span class="wardrobe-badge">내 옷</span>' : ""}</span>
+    </div>
   `;
+  container.innerHTML = row("상의", table.top) + row("하의", table.bottom) + row("양말", table.socks) + row("신발", table.shoes);
 }
 
 function tipBlockHtml(tip, showComingSoonHint) {
