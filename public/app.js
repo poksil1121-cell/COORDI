@@ -1002,16 +1002,21 @@ function renderRecommendationCards(rules) {
   hairCard.querySelector(".situation").textContent = rules.hair.situation;
   hairCard.querySelector(".advice").textContent = rules.hair.advice;
   const hairTag = hairCard.querySelector(".tag");
-  hairTag.textContent = tagLabel(rules.hair.tag);
-  hairTag.className = `tag ${rules.hair.tag}`;
+  if (rules.hair.tag === "neutral") {
+    hairTag.hidden = true;
+  } else {
+    hairTag.hidden = false;
+    hairTag.textContent = tagLabel(rules.hair.tag);
+    hairTag.className = `tag ${rules.hair.tag}`;
+  }
   renderEvidenceTrigger(hairCard.querySelector(".evidence-trigger"), rules.hair.evidence);
 
-  el("skinCard").querySelector(".skin-tips").innerHTML = rules.skin.map(tipBlockHtml).join("");
+  el("skinCard").querySelector(".skin-tips").innerHTML = rules.skin.map((tip) => tipBlockHtml(tip, true)).join("");
 
   const makeupCard = el("makeupCard");
   if (rules.makeup) {
     makeupCard.hidden = false;
-    makeupCard.querySelector(".makeup-tips").innerHTML = rules.makeup.map(tipBlockHtml).join("");
+    makeupCard.querySelector(".makeup-tips").innerHTML = rules.makeup.map((tip) => tipBlockHtml(tip, false)).join("");
   } else {
     makeupCard.hidden = true;
   }
@@ -1021,15 +1026,19 @@ function renderRecommendationCards(rules) {
   outfitCard.querySelector(".advice").textContent = rules.outfit.advice;
 }
 
-function tipBlockHtml(tip) {
+function tipBlockHtml(tip, showComingSoonHint) {
   const evidenceButton = tip.evidence
     ? `<button type="button" class="evidence-trigger tooltip-trigger" data-tooltip="${tip.evidence.summary}" data-evidence-id="${registerEvidence(tip.evidence)}">💡 전문가 팁</button>`
     : "";
+  const isComingSoon = showComingSoonHint && tip.tag === "suggested";
+  const tagAttrs = isComingSoon
+    ? `class="tag ${tip.tag} tooltip-trigger" tabindex="0" data-tooltip="아직 실제 제품 추천으로 연동되기 전이에요. 준비 중인 기능이에요."`
+    : `class="tag ${tip.tag}"`;
   return `
     <div class="tip-block">
       <p class="situation">${tip.situation}</p>
       <p class="advice">${tip.advice}</p>
-      <span class="tag ${tip.tag}">${tagLabel(tip.tag)}</span>
+      <span ${tagAttrs}>${tagLabel(tip.tag)}</span>
       ${evidenceButton}
     </div>
   `;
