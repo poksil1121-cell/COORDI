@@ -200,6 +200,7 @@
             <h4>조합표</h4>
             <div id="outfitTableBody"></div>
             <button type="button" id="outfitTableRefreshBtn" class="btn btn-secondary btn-outfit-refresh">🔄 다른 조합 보기</button>
+            <button type="button" id="openWardrobeBtn" class="btn btn-ghost btn-outfit-refresh">👕 내 의상 관리</button>
           </div>
 
           <div class="outfit-table-section style-reference-section">
@@ -234,6 +235,20 @@
   <div class="map-modal-inner evidence-modal-inner">
     <button type="button" id="evidenceModalClose" class="icon-btn map-modal-close" title="닫기">✕</button>
     <div id="evidenceModalBody" class="evidence-modal-body"></div>
+  </div>
+</div>
+
+<div id="wardrobeModal" class="map-modal" hidden>
+  <div class="map-modal-inner evidence-modal-inner">
+    <button type="button" id="wardrobeModalClose" class="icon-btn map-modal-close" title="닫기">✕</button>
+    <div class="wardrobe-modal-body">
+      <h3>👕 내 의상</h3>
+      <p class="coming-soon-note">사진을 올리면 AI가 카테고리·색상·스타일을 분석해서 등록해요. 등록된 의상은 조합표에 우선 사용돼요.</p>
+      <input type="file" id="wardrobePhotoInput" accept="image/*" hidden />
+      <button type="button" id="wardrobeAddBtn" class="btn btn-secondary">+ 사진으로 의상 추가</button>
+      <p id="wardrobeStatus" class="wardrobe-status" hidden></p>
+      <div id="wardrobeList" class="wardrobe-list"></div>
+    </div>
   </div>
 </div>
 

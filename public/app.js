@@ -503,6 +503,27 @@ function bindDashboardEvents() {
     const table = buildOutfitTable(profile, lastWeather);
     renderOutfitTable(el("outfitTableBody"), table);
   });
+
+  el("openWardrobeBtn").addEventListener("click", () => {
+    renderWardrobeList();
+    el("wardrobeModal").hidden = false;
+  });
+  el("wardrobeModalClose").addEventListener("click", () => {
+    el("wardrobeModal").hidden = true;
+  });
+  el("wardrobeModal").addEventListener("click", (e) => {
+    if (e.target.id === "wardrobeModal") el("wardrobeModal").hidden = true;
+  });
+  el("wardrobeAddBtn").addEventListener("click", () => el("wardrobePhotoInput").click());
+  el("wardrobePhotoInput").addEventListener("change", handleWardrobePhotoSelected);
+  el("wardrobeList").addEventListener("click", (e) => {
+    const btn = e.target.closest(".wardrobe-remove-btn");
+    if (!btn) return;
+    profile.wardrobe = (profile.wardrobe || []).filter((item) => item.id !== btn.dataset.wardrobeId);
+    saveProfile(profile);
+    renderWardrobeList();
+    refreshOutfitTableIfPossible();
+  });
 }
 
 async function showDashboard() {
@@ -1059,6 +1080,104 @@ const OUTFIT_TABLE = {
 
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+const WARDROBE_CATEGORY_LABEL = { top: "상의", bottom: "하의", socks: "양말", shoes: "신발", outer: "아우터" };
+
+function resizeImageToDataUrl(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.onerror = () => reject(new Error("이미지를 불러오지 못했어요."));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error("파일을 읽지 못했어요."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderWardrobeList() {
+  const list = el("wardrobeList");
+  const items = profile.wardrobe || [];
+  if (items.length === 0) {
+    list.innerHTML = `<p class="empty-note">아직 등록된 의상이 없어요.</p>`;
+    return;
+  }
+  list.innerHTML = items
+    .map(
+      (item) => `
+        <div class="wardrobe-item">
+          <img src="${item.imageDataUrl}" alt="${item.style}" class="wardrobe-thumb" />
+          <div class="wardrobe-item-info">
+            <span class="wardrobe-item-category">${WARDROBE_CATEGORY_LABEL[item.category] || item.category}</span>
+            <span class="wardrobe-item-desc">${item.style} · ${item.color}</span>
+          </div>
+          <button type="button" class="wardrobe-remove-btn" data-wardrobe-id="${item.id}" title="삭제">✕</button>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function refreshOutfitTableIfPossible() {
+  if (!lastWeather) return;
+  const table = buildOutfitTable(profile, lastWeather);
+  renderOutfitTable(el("outfitTableBody"), table);
+}
+
+async function handleWardrobePhotoSelected(e) {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+
+  const statusEl = el("wardrobeStatus");
+  statusEl.hidden = false;
+  statusEl.textContent = "사진을 분석하는 중…";
+
+  try {
+    const dataUrl = await resizeImageToDataUrl(file, 480);
+    const base64 = dataUrl.split(",")[1];
+    const mediaType = dataUrl.match(/^data:(.*?);base64/)[1];
+
+    const res = await fetch("/api/analyze-clothing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64: base64, mediaType }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      statusEl.textContent = data.error || "분석에 실패했어요.";
+      return;
+    }
+
+    const item = {
+      id: `w${Date.now()}`,
+      category: data.category,
+      color: data.color,
+      style: data.style,
+      imageDataUrl: dataUrl,
+    };
+    profile.wardrobe = profile.wardrobe || [];
+    profile.wardrobe.push(item);
+    saveProfile(profile);
+
+    statusEl.textContent = "의상을 등록했어요!";
+    renderWardrobeList();
+    refreshOutfitTableIfPossible();
+  } catch (err) {
+    statusEl.textContent = "사진을 처리하지 못했어요. 다시 시도해주세요.";
+  }
 }
 
 function buildOutfitTable(profile, w) {
