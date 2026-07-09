@@ -31,12 +31,24 @@ function categoryLabel(product) {
 
 // 날씨 상태 → accent 컬러 (디자인 토큰의 --accent, --accent-ink를 실시간으로 바꿔줌)
 const WEATHER_THEME = {
-  sunny: { accent: "#e8a33d", ink: "#7a4d0e", mark: "☀" },
-  rainy: { accent: "#4c8bf5", ink: "#1c3d7a", mark: "☔" },
-  cloudy: { accent: "#8a93a6", ink: "#3c4356", mark: "☁" },
-  snowy: { accent: "#7fd1e0", ink: "#0f5b68", mark: "❄" },
-  hot: { accent: "#e8613f", ink: "#8a2c17", mark: "🔥" },
-  cold: { accent: "#6e7fe0", ink: "#2c3aa0", mark: "🧊" },
+  sunny: { accent: "#e8a33d", ink: "#7a4d0e" },
+  rainy: { accent: "#4c8bf5", ink: "#1c3d7a" },
+  cloudy: { accent: "#8a93a6", ink: "#3c4356" },
+  snowy: { accent: "#7fd1e0", ink: "#0f5b68" },
+  hot: { accent: "#e8613f", ink: "#8a2c17" },
+  cold: { accent: "#6e7fe0", ink: "#2c3aa0" },
+};
+
+const ICON_ATTRS = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
+const BRAND_ICONS = {
+  default: `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none"/></svg>`,
+  sunny: `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M4.2 12H6.4M17.6 12h2.2M6.3 6.3l1.5 1.5M16.2 16.2l1.5 1.5M6.3 17.7l1.5-1.5M16.2 7.8l1.5-1.5"/></svg>`,
+  rainy: `<svg ${ICON_ATTRS}><path d="M3 12a9 9 0 0 1 18 0Z"/><path d="M12 12v7.5a1.8 1.8 0 0 1-1.8 1.8"/><path d="M12 3v2"/></svg>`,
+  cloudy: `<svg ${ICON_ATTRS}><path d="M7.5 18.5a4 4 0 0 1-.5-7.97 5 5 0 0 1 9.6-1.98A4.5 4.5 0 0 1 17 18.5H7.5Z"/></svg>`,
+  snowy: `<svg ${ICON_ATTRS}><path d="M12 2v20"/><path d="M3.34 7l17.32 10"/><path d="M3.34 17l17.32-10"/></svg>`,
+  hot: `<svg ${ICON_ATTRS}><rect x="10.25" y="3" width="3.5" height="11" rx="1.75"/><circle cx="12" cy="17" r="3"/><path d="M12 14v2"/></svg>`,
+  cold: `<svg ${ICON_ATTRS}><path d="M12 3l7 4v10l-7 4-7-4V7l7-4Z"/><path d="M12 3v18M5 7l7 4 7-4"/></svg>`,
 };
 
 // ============================================================
@@ -96,6 +108,7 @@ function saveProfile(p) {
 // 온보딩 (위저드)
 // ============================================================
 function showOnboarding(prefill) {
+  brandMark.innerHTML = BRAND_ICONS.default;
   onboardingView.hidden = false;
   dashboardView.hidden = true;
   currentStep = 1;
@@ -683,7 +696,7 @@ function applyTheme(themeKey) {
   const theme = WEATHER_THEME[themeKey] || WEATHER_THEME.sunny;
   document.documentElement.style.setProperty("--accent", theme.accent);
   document.documentElement.style.setProperty("--accent-ink", theme.ink);
-  brandMark.textContent = theme.mark;
+  brandMark.innerHTML = BRAND_ICONS[themeKey] || BRAND_ICONS.default;
 }
 
 function renderWeatherPanel(w) {
