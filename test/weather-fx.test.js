@@ -79,3 +79,65 @@ test("computeCloudFx grades by weather code 2 vs 3, null otherwise", () => {
   assert.equal(computeCloudFx({ code: 2 }).blobCount, 2);
   assert.equal(computeCloudFx({ code: 3 }).blobCount, 4);
 });
+
+const { computeLightningFx, computeStormFx, computeSkyFx } = require("../public/weather-fx.js");
+
+test("computeLightningFx activates only on thunderstorm codes 95/96/99", () => {
+  assert.equal(computeLightningFx({ code: 61 }), null);
+  assert.equal(computeLightningFx({ code: 95 }).flashInterval, 4.5);
+  assert.equal(computeLightningFx({ code: 96 }).flashInterval, 2.5);
+});
+
+test("computeStormFx requires strong wind plus rain or hail", () => {
+  assert.equal(computeStormFx({ isRainy: true, code: 61, wind: 30 }), null);
+  assert.equal(computeStormFx({ isRainy: false, code: 61, wind: 60 }), null);
+  assert.deepEqual(computeStormFx({ isRainy: true, code: 61, wind: 60 }), { intensify: true });
+  assert.deepEqual(computeStormFx({ isRainy: false, code: 99, wind: 60 }), { intensify: true });
+});
+
+test("computeSkyFx priority: hail beats everything else", () => {
+  const w = { code: 99, isRainy: true, isSnowy: false, precipSum: 5, pm10: 200, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "hail");
+});
+
+test("computeSkyFx priority: snow beats rain", () => {
+  const w = { code: 71, isRainy: true, isSnowy: true, precipSum: 3, pm10: 0, uv: 0, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "snow");
+});
+
+test("computeSkyFx priority: rain beats haze/fog/cloud/sun", () => {
+  const w = { code: 61, isRainy: true, isSnowy: false, precipSum: 3, pm10: 200, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "rain");
+});
+
+test("computeSkyFx priority: haze beats fog/cloud/sun", () => {
+  const w = { code: 45, isRainy: false, isSnowy: false, precipSum: 0, pm10: 200, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "haze");
+});
+
+test("computeSkyFx priority: fog beats cloud/sun", () => {
+  const w = { code: 45, isRainy: false, isSnowy: false, precipSum: 0, pm10: 0, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "fog");
+});
+
+test("computeSkyFx priority: cloud beats sun", () => {
+  const w = { code: 3, isRainy: false, isSnowy: false, precipSum: 0, pm10: 0, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(w).type, "cloud");
+});
+
+test("computeSkyFx falls back to sun, then null", () => {
+  const sunny = { code: 1, isRainy: false, isSnowy: false, precipSum: 0, pm10: 0, uv: 9, wind: 0 };
+  assert.equal(computeSkyFx(sunny).type, "sun");
+
+  const clear = { code: 0, isRainy: false, isSnowy: false, precipSum: 0, pm10: 0, uv: 0, wind: 0 };
+  assert.equal(computeSkyFx(clear), null);
+});
+
+test("computeSkyFx intensifies rain into a storm when wind is strong", () => {
+  const w = { code: 61, isRainy: true, isSnowy: false, precipSum: 0.5, pm10: 0, uv: 0, wind: 60 };
+  const sky = computeSkyFx(w);
+  assert.equal(sky.type, "rain");
+  assert.equal(sky.dark, true);
+  assert.equal(sky.storm, true);
+  assert.equal(sky.count, Math.round(15 * 1.4));
+});

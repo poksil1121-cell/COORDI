@@ -68,6 +68,54 @@ function computeCloudFx(w) {
   return null;
 }
 
+function computeLightningFx(w) {
+  if (!w || ![95, 96, 99].includes(w.code)) return null;
+  const intense = w.code === 96 || w.code === 99;
+  return { flashInterval: intense ? 2.5 : 4.5, flashOpacity: intense ? 0.9 : 0.65 };
+}
+
+function computeStormFx(w) {
+  if (!w) return null;
+  const isHailCode = w.code === 96 || w.code === 99;
+  if (!(w.isRainy || isHailCode)) return null;
+  if ((w.wind || 0) < 50) return null;
+  return { intensify: true };
+}
+
+function intensifyTier(tier, storm) {
+  if (!storm) return tier;
+  return { ...tier, count: Math.round(tier.count * 1.4), dark: true, storm: true };
+}
+
+function computeSkyFx(w) {
+  const storm = computeStormFx(w);
+
+  const hail = computeHailFx(w);
+  if (hail) return { type: "hail", ...intensifyTier(hail, storm) };
+
+  if (w && w.isSnowy) {
+    const snow = computeSnowFx(w);
+    if (snow) return { type: "snow", ...snow };
+  }
+
+  const rain = computeRainFx(w);
+  if (rain) return { type: "rain", ...intensifyTier(rain, storm) };
+
+  const haze = computeHazeFx(w);
+  if (haze) return { type: "haze", ...haze };
+
+  const fog = computeFogFx(w);
+  if (fog) return { type: "fog", ...fog };
+
+  const cloud = computeCloudFx(w);
+  if (cloud) return { type: "cloud", ...cloud };
+
+  const sun = computeSunFx(w);
+  if (sun) return { type: "sun", ...sun };
+
+  return null;
+}
+
 const SUN_TIERS = [
   { min: 3, max: 6, tier: "moderate", pulseDuration: 3.5, rays: false, shimmer: false, warm: false },
   {
@@ -161,5 +209,8 @@ if (typeof module !== "undefined" && module.exports) {
     computeHazeFx,
     computeFogFx,
     computeCloudFx,
+    computeLightningFx,
+    computeStormFx,
+    computeSkyFx,
   };
 }
