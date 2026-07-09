@@ -227,6 +227,27 @@ main { flex: 1; padding: 8px 20px 40px; }
 .search-row { display: flex; gap: 8px; }
 .search-row input { flex: 1; }
 
+.btn-location {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+.btn-location:hover:not(:disabled) { background: var(--line); }
+
+.location-error {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #ffe9e9;
+  color: #a94442;
+  font-size: 0.82rem;
+}
+
 .city-results {
   list-style: none;
   margin: 8px 0 0;

@@ -138,6 +138,7 @@ function bindOnboardingEvents() {
   });
 
   el("citySearchBtn").addEventListener("click", handleCitySearch);
+  el("useMyLocationBtn").addEventListener("click", handleUseMyLocation);
   el("citySearchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -203,6 +204,65 @@ function showSelectedCity(city) {
   const box = el("selectedCity");
   box.hidden = false;
   box.textContent = `📍 선택된 지역: ${city.name}${city.country ? " · " + city.country : ""}`;
+}
+
+async function handleUseMyLocation() {
+  const btn = el("useMyLocationBtn");
+  el("locationError").hidden = true;
+
+  if (!("geolocation" in navigator)) {
+    showLocationError("이 브라우저는 위치 서비스를 지원하지 않아요. 도시를 검색해주세요.");
+    return;
+  }
+
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "위치를 확인하는 중…";
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const name = await reverseGeocode(latitude, longitude);
+      selectedCity = { name, latitude, longitude, country: "" };
+      showSelectedCity(selectedCity);
+      el("cityResults").innerHTML = "";
+      el("toStep2").disabled = false;
+      btn.disabled = false;
+      btn.textContent = originalText;
+    },
+    (err) => {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      if (err.code === err.PERMISSION_DENIED) {
+        showLocationError("위치 권한이 거부됐어요. 브라우저 설정에서 허용하거나 도시를 검색해주세요.");
+      } else {
+        showLocationError("현재 위치를 확인할 수 없어요. 다시 시도하거나 도시를 검색해주세요.");
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+  );
+}
+
+function showLocationError(message) {
+  const box = el("locationError");
+  box.hidden = false;
+  box.textContent = message;
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
+    const res = await fetch(url, { headers: { "Accept-Language": "ko" } });
+    if (!res.ok) throw new Error("reverse geocode failed");
+    const data = await res.json();
+    const addr = data.address || {};
+    const primary =
+      addr.borough || addr.city_district || addr.city || addr.town || addr.village || addr.county || "현재 위치";
+    const secondary = [addr.city, addr.province, addr.state].find((v) => v && v !== primary);
+    return secondary ? `${primary} · ${secondary}` : primary;
+  } catch {
+    return "현재 위치";
+  }
 }
 
 function addProductRow(existing) {
