@@ -784,3 +784,18 @@ main { flex: 1; padding: 8px 20px 40px; }
   font-size: 0.75rem;
   color: var(--ink-faint);
 }
+
+/* ============================================================
+   지도
+   ============================================================ */
+.mini-map {
+  height: 140px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: 12px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.mini-map .leaflet-control-attribution {
+  font-size: 9px;
+}
