@@ -802,3 +802,44 @@ main { flex: 1; padding: 8px 20px 40px; }
 .weather-content .mini-map {
   margin-top: 20px;
 }
+
+.map-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 20, 34, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.map-modal[hidden] { display: none; }
+
+.map-modal-inner {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  height: 80vh;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.map-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.explore-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-popup { font-size: 0.85rem; line-height: 1.6; }
+.map-popup-loading { font-size: 0.85rem; margin: 0; }
+.map-popup .btn { margin-top: 8px; width: 100%; padding: 8px 12px; font-size: 0.82rem; }

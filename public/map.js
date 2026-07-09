@@ -41,3 +41,57 @@ function createMiniMap(container, lat, lon, onClick) {
     container.addEventListener("click", onClick);
   }
 }
+
+let exploreMap = null;
+let exploreClickHandler = null;
+
+function openMapExplorer(lat, lon, callbacks) {
+  document.getElementById("mapModal").hidden = false;
+
+  if (!exploreMap) {
+    exploreMap = L.map("exploreMap", { zoomControl: true });
+    addOsmTileLayer(exploreMap);
+  }
+
+  exploreMap.setView([lat, lon], 12);
+  setTimeout(() => exploreMap.invalidateSize(), 0);
+
+  if (exploreClickHandler) {
+    exploreMap.off("click", exploreClickHandler);
+  }
+  exploreClickHandler = (e) => handleExploreMapClick(e, callbacks);
+  exploreMap.on("click", exploreClickHandler);
+}
+
+function closeMapExplorer() {
+  document.getElementById("mapModal").hidden = true;
+}
+
+async function handleExploreMapClick(e, callbacks) {
+  const { lat, lng } = e.latlng;
+  const popup = L.popup()
+    .setLatLng([lat, lng])
+    .setContent('<p class="map-popup-loading">날씨를 조회하는 중…</p>')
+    .openOn(exploreMap);
+
+  const html = await callbacks.onFetchWeatherHtml(lat, lng);
+  popup.setContent(`
+    <div class="map-popup">
+      ${html}
+      <button type="button" class="btn btn-primary map-popup-select">이 위치로 지역 설정</button>
+    </div>
+  `);
+
+  const btn = document.querySelector(".leaflet-popup-content .map-popup-select");
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      await callbacks.onSelectLocation(lat, lng);
+      closeMapExplorer();
+    });
+  }
+}
+
+document.getElementById("mapModalClose").addEventListener("click", closeMapExplorer);
+document.getElementById("mapModal").addEventListener("click", (e) => {
+  if (e.target.id === "mapModal") closeMapExplorer();
+});
