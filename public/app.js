@@ -167,6 +167,21 @@ function bindOnboardingEvents() {
   });
 }
 
+async function fetchGeocodingVariants(query) {
+  const queries = buildSearchQueries(query);
+  const responses = await Promise.all(
+    queries.map((q) =>
+      fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=ko&format=json`
+      )
+        .then((res) => (res.ok ? res.json() : { results: [] }))
+        .catch(() => ({ results: [] }))
+    )
+  );
+  const merged = mergeGeocodingResults(responses.map((d) => d.results));
+  return merged.slice(0, 12);
+}
+
 async function handleCitySearch() {
   const query = el("citySearchInput").value.trim();
   const resultsEl = el("cityResults");
@@ -176,19 +191,15 @@ async function handleCitySearch() {
   resultsEl.innerHTML = `<li class="empty-note">검색 중…</li>`;
 
   try {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-      query
-    )}&count=10&language=ko&format=json`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const results = await fetchGeocodingVariants(query);
 
     resultsEl.innerHTML = "";
-    if (!data.results || data.results.length === 0) {
+    if (results.length === 0) {
       resultsEl.innerHTML = `<li class="empty-note">검색 결과가 없어요. 다른 이름으로 시도해보세요.</li>`;
       return;
     }
 
-    data.results.forEach((r) => {
+    results.forEach((r) => {
       const li = document.createElement("li");
       const adminParts = [r.admin2, r.admin1].filter(Boolean).join(" · ");
       const region = adminParts ? `${adminParts} · ` : "";
