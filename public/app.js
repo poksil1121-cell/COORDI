@@ -452,7 +452,6 @@ async function showDashboard() {
   dashboardView.hidden = false;
   el("cardsGrid").hidden = true;
   el("aiSection").hidden = true;
-  el("weatherLoading").hidden = false;
   el("weatherPanel").innerHTML = `<div class="weather-loading" id="weatherLoading">날씨를 불러오는 중이에요…</div>`;
 
   if (!profile.region) {
