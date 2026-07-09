@@ -621,10 +621,10 @@ function renderWeatherPanel(w) {
       </div>
 
       <div class="gauge-row">
-        ${gaugeHtml("습도", `${Math.round(w.humidity)}%`, w.humidity)}
-        ${gaugeHtml("바람", `${Math.round(w.wind)}`, Math.min(100, w.wind * 2.5))}
-        ${gaugeHtml("강수", `${Math.round(w.precipProb)}%`, w.precipProb)}
-        ${gaugeHtml("자외선", `${Math.round(w.uv)}`, Math.min(100, w.uv * 9))}
+        ${gaugeHtml("습도", `${Math.round(w.humidity)}%`, w.humidity, "공기 중 수분 비율이에요. 65% 이상이면 습함, 35% 이하면 건조로 구분해서 추천에 반영해요. 습하면 모발 컬이 풀리기 쉽고, 건조하면 피부·모발 수분이 빠르게 손실돼요.")}
+        ${gaugeHtml("바람", `${Math.round(w.wind)}`, Math.min(100, w.wind * 2.5), "시속 풍속(km/h)이에요. 20km/h 이상이면 강풍으로 분류해서 헤어 고정과 아우터를 더 신경 쓰도록 추천해요.")}
+        ${gaugeHtml("강수", `${Math.round(w.precipProb)}%`, w.precipProb, "오늘 비가 올 확률이에요. 50% 이상이면 우산·방수 신발을 챙기도록 추천해요.")}
+        ${gaugeHtml("자외선", `${Math.round(w.uv)}`, Math.min(100, w.uv * 9), "자외선 지수(UV Index)예요. WHO 기준 0~2 낮음, 3~5 보통, 6~7 높음, 8~10 매우높음, 11+ 위험 등급이며, 6 이상부터 선크림 재도포를 추천해요.")}
       </div>
 
       <div id="dashboardMiniMap" class="mini-map"></div>
@@ -645,9 +645,9 @@ function renderWeatherPanel(w) {
   });
 }
 
-function gaugeHtml(label, value, pct) {
+function gaugeHtml(label, value, pct, tooltip) {
   return `
-    <div class="gauge-item">
+    <div class="gauge-item tooltip-trigger" tabindex="0" data-tooltip="${tooltip}">
       <div class="gauge" style="--pct:${pct}">
         <div class="gauge-inner">${value}</div>
       </div>

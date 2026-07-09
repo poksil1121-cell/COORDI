@@ -341,7 +341,6 @@ main { flex: 1; padding: 8px 20px 40px; }
    ============================================================ */
 .weather-panel {
   position: relative;
-  overflow: hidden;
   margin-top: 10px;
   border-radius: var(--radius-lg);
   padding: 22px;
@@ -356,6 +355,7 @@ main { flex: 1; padding: 8px 20px 40px; }
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  border-radius: inherit;
   pointer-events: none;
   transition: background 0.6s ease;
 }
@@ -843,3 +843,36 @@ main { flex: 1; padding: 8px 20px 40px; }
 .map-popup { font-size: 0.85rem; line-height: 1.6; }
 .map-popup-loading { font-size: 0.85rem; margin: 0; }
 .map-popup .btn { margin-top: 8px; width: 100%; padding: 8px 12px; font-size: 0.82rem; }
+
+/* ============================================================
+   공용 툴팁 (게이지, 전문가 팁 트리거에서 재사용)
+   ============================================================ */
+.tooltip-trigger {
+  position: relative;
+  cursor: help;
+}
+.tooltip-trigger::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 200px;
+  max-width: 60vw;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(20, 24, 38, 0.95);
+  color: white;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+}
+.tooltip-trigger:hover::after,
+.tooltip-trigger:focus::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
