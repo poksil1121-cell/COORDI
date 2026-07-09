@@ -787,6 +787,25 @@ function buildHairRec(profile, w) {
   return { situation, advice, tag, evidence };
 }
 
+const SKIN_EVIDENCE_DRY = {
+  summary: "건조한 환경에서는 피부 장벽의 수분이 빠르게 증발해요.",
+  rationale:
+    "각질층(피부 최외곽 장벽)은 세라마이드와 자연보습인자로 수분을 붙잡는데, 대기 습도가 낮으면 피부 표면의 경피수분손실(TEWL)이 늘어나 장벽이 약해지고 당김·각질이 생기기 쉬워요. 보습 크림·로션을 두껍게 발라 폐색막(occlusive layer)을 만들면 수분 증발을 줄일 수 있어요.",
+  source: "미국피부과학회(AAD)의 일반 보습 관리 권고와 일치하는 원리예요.",
+};
+const SKIN_EVIDENCE_UV = {
+  summary: "자외선 지수가 높을 때는 자외선 차단이 피부 노화·손상 예방의 핵심이에요.",
+  rationale:
+    "자외선(UVA/UVB)은 피부 콜라겐을 분해하고 색소침착·광노화를 유발해요. SPF30 이상의 자외선차단제를 충분량 도포하고 2~3시간마다 덧바르는 게 차단 효과를 유지하는 표준적인 방법이에요.",
+  source: "미국피부과학회(AAD)와 세계보건기구(WHO)가 공통으로 권고하는 자외선 차단 가이드라인이에요.",
+};
+const SKIN_EVIDENCE_HUMID = {
+  summary: "고온다습 환경에서는 피지 분비가 늘어 유분·번들거림이 쉽게 생겨요.",
+  rationale:
+    "체온이 오르면 피지선 활동이 증가해 피지 분비가 늘고, 습도가 높으면 땀과 뒤섞여 번들거림·모공 막힘이 쉬워져요. 산뜻한 미스트나 가벼운 텍스처 제품은 무거운 유분 추가 없이 피부를 정돈해줘요.",
+  source: "일반적으로 알려진 피부생리학(피지선 기능) 원리예요.",
+};
+
 function buildSkinRecs(profile, w) {
   const tips = [];
 
@@ -798,6 +817,7 @@ function buildSkinRecs(profile, w) {
         ? `${m.name}를 평소보다 한 겹 더 덧발라 수분 손실을 막아주세요.`
         : `보습 크림이나 로션을 평소보다 두껍게 발라 수분 손실을 막아주는 게 좋아요.`,
       tag: m ? "owned" : "suggested",
+      evidence: SKIN_EVIDENCE_DRY,
     });
   }
 
@@ -809,6 +829,7 @@ function buildSkinRecs(profile, w) {
         ? `${s.name}를 아침에 바르고 2~3시간마다 덧바르는 걸 잊지 마세요.`
         : `자외선이 강한 날이에요. SPF 30 이상의 선크림을 준비해서 아침에 바르고 2~3시간마다 덧바르는 걸 추천해요.`,
       tag: s ? "owned" : "suggested",
+      evidence: SKIN_EVIDENCE_UV,
     });
   }
 
@@ -820,6 +841,7 @@ function buildSkinRecs(profile, w) {
         ? `${mist.name}로 중간중간 피부를 가볍게 정돈해주세요. 유분이 늘어날 수 있으니 산뜻한 제품 위주로 마무리하는 걸 추천해요.`
         : `유분이 늘어나기 쉬운 날씨예요. 산뜻한 미스트나 가벼운 텍스처의 제품으로 마무리해보세요.`,
       tag: mist ? "owned" : "suggested",
+      evidence: SKIN_EVIDENCE_HUMID,
     });
   }
 
@@ -920,11 +942,15 @@ function renderRecommendationCards(rules) {
 }
 
 function tipBlockHtml(tip) {
+  const evidenceButton = tip.evidence
+    ? `<button type="button" class="evidence-trigger tooltip-trigger" data-tooltip="${tip.evidence.summary}" data-evidence-id="${registerEvidence(tip.evidence)}">💡 전문가 팁</button>`
+    : "";
   return `
     <div class="tip-block">
       <p class="situation">${tip.situation}</p>
       <p class="advice">${tip.advice}</p>
       <span class="tag ${tip.tag}">${tagLabel(tip.tag)}</span>
+      ${evidenceButton}
     </div>
   `;
 }
