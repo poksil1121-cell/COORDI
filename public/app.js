@@ -282,6 +282,8 @@ function addProductRow(existing) {
   const nameInput = node.querySelector(".product-name");
   const categorySelect = node.querySelector(".product-category");
   const customInput = node.querySelector(".product-custom-category");
+  const suggestionsEl = node.querySelector(".product-suggestions");
+  const infoEl = node.querySelector(".product-info");
 
   if (existing) {
     nameInput.value = existing.name || "";
@@ -290,6 +292,11 @@ function addProductRow(existing) {
       customInput.hidden = false;
       customInput.value = existing.customCategory;
     }
+    if (existing.features || existing.usage) {
+      node.dataset.features = existing.features || "";
+      node.dataset.usage = existing.usage || "";
+      showProductInfo(infoEl, existing.features, existing.usage);
+    }
   }
 
   categorySelect.addEventListener("change", () => {
@@ -297,8 +304,60 @@ function addProductRow(existing) {
     if (categorySelect.value !== "other") customInput.value = "";
   });
 
+  nameInput.addEventListener("input", () => {
+    delete node.dataset.features;
+    delete node.dataset.usage;
+    infoEl.hidden = true;
+    renderProductSuggestions(nameInput, suggestionsEl, (match) => {
+      nameInput.value = `${match.brand} ${match.name}`;
+      categorySelect.value = match.category;
+      categorySelect.dispatchEvent(new Event("change"));
+      node.dataset.features = match.features;
+      node.dataset.usage = match.usage;
+      showProductInfo(infoEl, match.features, match.usage);
+      suggestionsEl.hidden = true;
+      suggestionsEl.innerHTML = "";
+    });
+  });
+
   node.querySelector(".remove-product-btn").addEventListener("click", () => node.remove());
   el("productList").appendChild(node);
+}
+
+function showProductInfo(infoEl, features, usage) {
+  if (!features && !usage) {
+    infoEl.hidden = true;
+    return;
+  }
+  infoEl.hidden = false;
+  infoEl.innerHTML = `✓ ${features || ""}${usage ? ` · 사용법: ${usage}` : ""}`;
+}
+
+function renderProductSuggestions(nameInput, suggestionsEl, onSelect) {
+  const query = nameInput.value.trim().toLowerCase();
+  suggestionsEl.innerHTML = "";
+  if (!query) {
+    suggestionsEl.hidden = true;
+    return;
+  }
+
+  const matches = PRODUCT_CATALOG.filter((p) => {
+    const haystack = [p.name, p.brand, ...(p.aliases || [])].join(" ").toLowerCase();
+    return haystack.includes(query);
+  }).slice(0, 6);
+
+  if (matches.length === 0) {
+    suggestionsEl.hidden = true;
+    return;
+  }
+
+  suggestionsEl.hidden = false;
+  matches.forEach((match) => {
+    const li = document.createElement("li");
+    li.textContent = `${match.brand} ${match.name}`;
+    li.addEventListener("click", () => onSelect(match));
+    suggestionsEl.appendChild(li);
+  });
 }
 
 function collectProfileFromForm() {
@@ -311,6 +370,8 @@ function collectProfileFromForm() {
         const custom = row.querySelector(".product-custom-category").value.trim();
         if (custom) product.customCategory = custom;
       }
+      if (row.dataset.features) product.features = row.dataset.features;
+      if (row.dataset.usage) product.usage = row.dataset.usage;
       return product;
     })
     .filter((p) => p.name.length > 0);

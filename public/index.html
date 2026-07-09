@@ -114,6 +114,7 @@
 
           <div id="productList" class="product-list"></div>
           <button type="button" id="addProductBtn" class="btn btn-secondary btn-add">+ 제품 추가</button>
+          <p class="product-disclaimer">제품 정보는 참고용 요약이며, 정확한 성분은 제품 패키지나 판매처에서 확인해주세요.</p>
 
           <div class="wizard-actions">
             <button type="button" class="btn btn-ghost" data-prev="2">이전</button>
@@ -185,7 +186,10 @@
 <!-- 제품 항목 템플릿 -->
 <template id="productRowTemplate">
   <div class="product-row">
-    <input type="text" class="product-name" placeholder="제품 이름 (예: 아토베리어 365 크림)" autocomplete="off" />
+    <div class="product-name-wrap">
+      <input type="text" class="product-name" placeholder="제품 이름 (예: 아토베리어 365 크림)" autocomplete="off" />
+      <ul class="product-suggestions" hidden></ul>
+    </div>
     <select class="product-category">
       <option value="hair_fix">헤어 고정 (스프레이/무스/젤)</option>
       <option value="hair_moisture">헤어 보습/영양 (에센스/오일)</option>
@@ -205,6 +209,7 @@
     </select>
     <button type="button" class="remove-product-btn" title="삭제">✕</button>
     <input type="text" class="product-custom-category" placeholder="카테고리 직접 입력 (예: 향수)" hidden />
+    <p class="product-info" hidden></p>
   </div>
 </template>
 

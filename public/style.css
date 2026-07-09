@@ -741,3 +741,46 @@ main { flex: 1; padding: 8px 20px 40px; }
     animation: none !important;
   }
 }
+
+/* ============================================================
+   제품 자동완성
+   ============================================================ */
+.product-row { position: relative; }
+.product-name-wrap { position: relative; }
+
+.product-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  max-height: 180px;
+  overflow-y: auto;
+}
+.product-suggestions li {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.product-suggestions li:hover { background: var(--surface-soft); }
+
+.product-info {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.product-disclaimer {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
