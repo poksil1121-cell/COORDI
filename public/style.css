@@ -588,7 +588,9 @@ main { flex: 1; padding: 8px 20px 40px; }
   right: 10%;
   width: 90px;
   height: 90px;
-  background: conic-gradient(from 0deg, transparent 0 10%, rgba(255, 214, 120, 0.35) 12%, transparent 14% 100%);
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 214, 120, 0.32) 0deg 6deg, transparent 6deg 24deg);
+  mix-blend-mode: screen;
   animation: sunRotate var(--rotate-duration) linear infinite;
 }
 
@@ -602,16 +604,17 @@ main { flex: 1; padding: 8px 20px 40px; }
   left: 0;
   right: 0;
   bottom: 0;
-  height: 40%;
-  background: repeating-linear-gradient(to right, transparent 0, rgba(255, 255, 255, 0.08) 8px, transparent 16px);
+  height: 35%;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.1), transparent);
+  filter: blur(3px);
   animation: shimmer 2.4s ease-in-out infinite;
 }
 .heat-shimmer--light { opacity: 0.35; animation-duration: 3s; }
-.heat-shimmer--heavy { opacity: 0.55; animation-duration: 1.6s; }
+.heat-shimmer--heavy { opacity: 0.55; animation-duration: 1.6s; filter: blur(4px); }
 
 @keyframes shimmer {
-  0%, 100% { transform: translateX(0) skewX(0deg); }
-  50% { transform: translateX(6px) skewX(1.5deg); }
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-6px) scaleY(1.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -743,15 +746,35 @@ main { flex: 1; padding: 8px 20px 40px; }
   100% { opacity: 0; }
 }
 
+.lightning-bolt {
+  position: absolute;
+  top: 0;
+  left: var(--bolt-left, 60%);
+  width: 40px;
+  height: 55%;
+  background: rgba(255, 255, 255, 0.85);
+  clip-path: polygon(40% 0%, 60% 0%, 45% 40%, 65% 40%, 30% 100%, 40% 55%, 20% 55%);
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+  animation: boltFlash var(--flash-interval) ease-out infinite;
+}
+@keyframes boltFlash {
+  0%, 92% { opacity: 0; }
+  93% { opacity: 0.9; }
+  94% { opacity: 0; }
+  96% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
 .wind-streak {
   position: absolute;
   left: -10%;
   top: var(--top);
-  width: 40%;
+  width: var(--width, 40%);
   height: 2px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, var(--stroke-opacity, 0.35));
   transform: rotate(8deg);
-  animation: windStreak 0.9s linear var(--delay) infinite;
+  animation: windStreak var(--duration, 0.9s) linear var(--delay) infinite;
 }
 @keyframes windStreak {
   from { transform: translateX(0) rotate(8deg); opacity: 0; }
@@ -761,7 +784,7 @@ main { flex: 1; padding: 8px 20px 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hailstone, .snowflake, .haze-particle, .fog-band, .cloud-blob, .lightning-flash, .wind-streak {
+  .hailstone, .snowflake, .haze-particle, .haze-cloud, .fog-band, .cloud-blob, .lightning-flash, .lightning-bolt, .wind-streak {
     animation: none !important;
   }
 }

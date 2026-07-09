@@ -180,6 +180,12 @@ function renderWeatherFx(container, w) {
     flash.style.setProperty("--flash-interval", `${lightning.flashInterval}s`);
     flash.style.setProperty("--flash-opacity", lightning.flashOpacity);
     container.appendChild(flash);
+
+    const bolt = document.createElement("div");
+    bolt.className = "lightning-bolt";
+    bolt.style.setProperty("--bolt-left", `${Math.round(20 + Math.random() * 60)}%`);
+    bolt.style.setProperty("--flash-interval", `${lightning.flashInterval}s`);
+    container.appendChild(bolt);
   }
 }
 
@@ -281,6 +287,9 @@ function renderWindStreaks(container) {
     streak.className = "wind-streak";
     streak.style.setProperty("--top", `${Math.random() * 100}%`);
     streak.style.setProperty("--delay", `${(Math.random() * -2).toFixed(2)}s`);
+    streak.style.setProperty("--duration", `${randomBetween(0.6, 1.3).toFixed(2)}s`);
+    streak.style.setProperty("--width", `${Math.round(randomBetween(25, 50))}%`);
+    streak.style.setProperty("--stroke-opacity", randomBetween(0.25, 0.45).toFixed(2));
     container.appendChild(streak);
   }
 }
