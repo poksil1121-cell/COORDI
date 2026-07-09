@@ -970,3 +970,27 @@ main { flex: 1; padding: 8px 20px 40px; }
   background: var(--surface-soft);
   font-size: 0.85rem;
 }
+
+.outfit-table-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.outfit-table-section h4 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.outfit-table-row {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--surface-soft);
+}
+.outfit-table-row:last-child { border-bottom: none; }
+.outfit-table-label {
+  flex: 0 0 44px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}

@@ -732,6 +732,7 @@ function buildRecommendations(profile, w) {
     skin: buildSkinRecs(profile, w),
     makeup: profile.wantsMakeup ? buildMakeupRecs(profile, w) : null,
     outfit: buildOutfitRec(profile, w),
+    outfitTable: buildOutfitTable(profile, w),
   };
 }
 
@@ -977,6 +978,73 @@ function styleOutfitHint(profile) {
   return STYLE_OUTFIT_HINT[profile.styleType] || "";
 }
 
+const OUTFIT_TABLE = {
+  casual: {
+    top: { hot: "루즈핏 반팔 티셔츠 · 화이트/베이지", mild: "오버사이즈 스웨트셔츠 · 그레이", cold: "후드 집업 + 히트텍 이너 · 네이비" },
+    bottom: "스트레이트 데님 팬츠 · 블루",
+    socks: "무지 크루 삭스 · 화이트",
+    shoes: "캔버스 스니커즈 · 화이트",
+  },
+  minimal: {
+    top: { hot: "무지 반팔 티셔츠 · 오프화이트", mild: "라운드넥 니트 · 그레이", cold: "울 코트 + 터틀넥 · 차콜" },
+    bottom: "테이퍼드 슬랙스 · 블랙",
+    socks: "발목 삭스 · 블랙",
+    shoes: "미니멀 로퍼 · 블랙",
+  },
+  street: {
+    top: { hot: "그래픽 반팔 티셔츠 · 블랙", mild: "오버사이즈 후드 + 워크자켓 · 카키", cold: "패딩 아우터 + 후드 레이어드 · 블랙" },
+    bottom: "와이드 카고 팬츠 · 카키",
+    socks: "로고 크루 삭스 · 화이트",
+    shoes: "청키 스니커즈 · 화이트/블랙",
+  },
+  feminine: {
+    top: { hot: "프릴 블라우스 · 라이트핑크", mild: "니트 가디건 + 슬립 원피스 · 아이보리", cold: "울 코트 + 니트 레이어드 · 베이지" },
+    bottom: "플레어 스커트 · 라벤더",
+    socks: "레이스 삭스 · 화이트",
+    shoes: "메리제인 플랫 · 베이지",
+  },
+  classic: {
+    top: { hot: "린넨 셔츠 · 라이트블루", mild: "브이넥 니트 + 셔츠 레이어드 · 네이비", cold: "울 코트 + 셔츠 · 그레이" },
+    bottom: "슬랙스 · 차콜",
+    socks: "발목 삭스 · 네이비",
+    shoes: "로퍼 · 브라운",
+  },
+  sporty: {
+    top: { hot: "드라이핏 반팔 티셔츠 · 블랙", mild: "트레이닝 재킷 · 네이비/화이트", cold: "플리스 집업 + 패딩 베스트 · 블랙" },
+    bottom: "조거 팬츠 · 블랙",
+    socks: "스포츠 크루 삭스 · 화이트",
+    shoes: "러닝화 · 화이트/네온",
+  },
+  vintage: {
+    top: { hot: "레트로 스트라이프 반팔 · 브라운톤", mild: "체크 니트 베스트 + 셔츠 · 머스타드", cold: "코듀로이 자켓 · 카멜" },
+    bottom: "와이드 코듀로이 팬츠 · 브라운",
+    socks: "레트로 스트라이프 삭스 · 크림",
+    shoes: "로퍼 또는 첼시부츠 · 브라운",
+  },
+};
+
+function buildOutfitTable(profile, w) {
+  const table = OUTFIT_TABLE[profile.styleType];
+  if (!table) return null;
+
+  const tempGroup = ["very_hot", "hot"].includes(w.tempBand)
+    ? "hot"
+    : ["cold", "very_cold"].includes(w.tempBand)
+    ? "cold"
+    : "mild";
+
+  let shoes = table.shoes;
+  if (w.isRainy) shoes += " (방수 소재 추천)";
+  if (w.isSnowy) shoes += " (미끄럼 방지 밑창 추천)";
+
+  return {
+    top: table.top[tempGroup],
+    bottom: table.bottom,
+    socks: table.socks,
+    shoes,
+  };
+}
+
 function buildOutfitRec(profile, w) {
   let advice = OUTFIT_BASE[w.tempBand];
   if (w.isRainy) advice += " 우산과 방수가 되는 신발도 챙기세요.";
@@ -1024,6 +1092,20 @@ function renderRecommendationCards(rules) {
   const outfitCard = el("outfitCard");
   outfitCard.querySelector(".situation").textContent = rules.outfit.situation;
   outfitCard.querySelector(".advice").textContent = rules.outfit.advice;
+  renderOutfitTable(el("outfitTableBody"), rules.outfitTable);
+}
+
+function renderOutfitTable(container, table) {
+  if (!table) {
+    container.innerHTML = `<p class="empty-note">직접 입력한 스타일의 조합표는 아직 준비 중이에요.</p>`;
+    return;
+  }
+  container.innerHTML = `
+    <div class="outfit-table-row"><span class="outfit-table-label">상의</span><span>${table.top}</span></div>
+    <div class="outfit-table-row"><span class="outfit-table-label">하의</span><span>${table.bottom}</span></div>
+    <div class="outfit-table-row"><span class="outfit-table-label">양말</span><span>${table.socks}</span></div>
+    <div class="outfit-table-row"><span class="outfit-table-label">신발</span><span>${table.shoes}</span></div>
+  `;
 }
 
 function tipBlockHtml(tip, showComingSoonHint) {
