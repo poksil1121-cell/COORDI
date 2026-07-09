@@ -102,6 +102,8 @@ function showOnboarding(prefill) {
   renderStep();
 
   if (prefill) {
+    el("nicknameInput").value = prefill.nickname || "";
+    el("ageInput").value = prefill.age || "";
     el("genderInput").value = prefill.gender || "female";
     el("wantsMakeupInput").checked = !!prefill.wantsMakeup;
     el("hairTypeInput").value = prefill.hairType || "straight";
@@ -114,6 +116,8 @@ function showOnboarding(prefill) {
 
     el("toStep2").disabled = !selectedCity;
   } else {
+    el("nicknameInput").value = "";
+    el("ageInput").value = "";
     el("productList").innerHTML = "";
     el("cityResults").innerHTML = "";
     el("selectedCity").hidden = true;
@@ -415,6 +419,8 @@ function collectProfileFromForm() {
     .filter((p) => p.name.length > 0);
 
   return {
+    nickname: el("nicknameInput").value.trim(),
+    age: el("ageInput").value ? Number(el("ageInput").value) : null,
     gender: el("genderInput").value,
     wantsMakeup: el("wantsMakeupInput").checked,
     hairType: el("hairTypeInput").value,
@@ -432,6 +438,7 @@ function renderSummary() {
       : "등록된 제품 없음 — 필요할 때 종류를 제안해드릴게요.";
 
   el("summaryBox").innerHTML = `
+    <b>닉네임</b> ${p.nickname || "-"} · <b>나이</b> ${p.age ?? "-"}<br/>
     <b>지역</b> ${p.region ? p.region.name : "-"}<br/>
     <b>성별</b> ${GENDER_LABEL[p.gender]} · <b>메이크업 추천</b> ${p.wantsMakeup ? "받음" : "받지 않음"}<br/>
     <b>모발</b> ${HAIR_LABEL[p.hairType]} · <b>피부</b> ${SKIN_LABEL[p.skinType]}<br/><br/>
@@ -470,6 +477,15 @@ function bindDashboardEvents() {
 async function showDashboard() {
   onboardingView.hidden = true;
   dashboardView.hidden = false;
+
+  const greetingEl = el("dashboardGreeting");
+  if (profile.nickname) {
+    greetingEl.hidden = false;
+    greetingEl.textContent = `${profile.nickname}님, 오늘의 웨더핏이에요`;
+  } else {
+    greetingEl.hidden = true;
+  }
+
   el("cardsGrid").hidden = true;
   el("aiSection").hidden = true;
   el("weatherPanel").innerHTML = `<div class="weather-loading" id="weatherLoading">날씨를 불러오는 중이에요…</div>`;

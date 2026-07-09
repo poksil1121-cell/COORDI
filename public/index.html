@@ -46,6 +46,16 @@
           <p class="step-desc">날씨 조회와 추천 톤을 맞추기 위한 최소한의 정보예요.</p>
 
           <label class="field">
+            <span>닉네임 (선택)</span>
+            <input type="text" id="nicknameInput" placeholder="예: 지수" />
+          </label>
+
+          <label class="field">
+            <span>나이 (선택)</span>
+            <input type="number" id="ageInput" placeholder="예: 27" min="0" max="120" />
+          </label>
+
+          <label class="field">
             <span>성별</span>
             <select id="genderInput">
               <option value="female">여성</option>
@@ -141,6 +151,8 @@
 
     <!-- ───────────────── 대시보드 ───────────────── -->
     <section id="dashboard" class="view" hidden>
+
+      <p id="dashboardGreeting" class="dashboard-greeting" hidden></p>
 
       <div class="weather-panel" id="weatherPanel">
         <div class="weather-loading" id="weatherLoading">날씨를 불러오는 중이에요…</div>
