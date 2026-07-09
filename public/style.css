@@ -627,33 +627,40 @@ main { flex: 1; padding: 8px 20px 40px; }
   position: absolute;
   left: var(--left);
   top: -8%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  width: 6px;
+  height: 6px;
+  border-radius: 40% 60% 55% 45%;
+  background: rgba(226, 232, 240, 0.92);
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
   opacity: var(--opacity);
-  animation: hailfall var(--duration) linear var(--delay) infinite;
+  animation: hailfall var(--duration) cubic-bezier(0.55, 0, 1, 0.45) var(--delay) infinite;
 }
 @keyframes hailfall {
-  0% { top: -8%; }
-  100% { top: 100%; }
+  0% { top: -8%; transform: rotate(0deg); }
+  85% { top: 96%; transform: rotate(160deg); }
+  90% { top: 90%; transform: rotate(180deg); }
+  95% { top: 97%; transform: rotate(190deg); }
+  100% { top: 94%; transform: rotate(200deg); opacity: 0; }
 }
 
 .snowflake {
   position: absolute;
   left: var(--left);
   top: -6%;
-  width: 6px;
-  height: 6px;
+  width: var(--size, 6px);
+  height: var(--size, 6px);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55) 70%);
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
   opacity: var(--opacity);
   animation: snowfall var(--duration) ease-in-out var(--delay) infinite;
 }
 @keyframes snowfall {
-  0% { top: -6%; transform: translateX(0); }
-  50% { transform: translateX(10px); }
-  100% { top: 110%; transform: translateX(-10px); }
+  0% { top: -6%; transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(12px) rotate(45deg); }
+  50% { transform: translateX(-8px) rotate(90deg); }
+  75% { transform: translateX(10px) rotate(135deg); }
+  100% { top: 110%; transform: translateX(-6px) rotate(180deg); }
 }
 .weather-fx.weather-fx--snowbright { background: rgba(255, 255, 255, 0.12); }
 

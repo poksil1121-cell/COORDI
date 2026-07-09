@@ -30,10 +30,10 @@ function computeHailFx(w) {
 }
 
 const SNOW_TIERS = [
-  { max: 1, tier: "light", count: 20, durMin: 5, durMax: 7, opMin: 0.5, opMax: 0.7, bright: false },
-  { max: 5, tier: "moderate", count: 40, durMin: 4, durMax: 5.5, opMin: 0.55, opMax: 0.75, bright: false },
-  { max: 15, tier: "heavy", count: 70, durMin: 3, durMax: 4.5, opMin: 0.6, opMax: 0.8, bright: false },
-  { max: Infinity, tier: "blizzard", count: 110, durMin: 2, durMax: 3.5, opMin: 0.65, opMax: 0.85, bright: true },
+  { max: 1, tier: "light", count: 20, durMin: 5, durMax: 7, opMin: 0.5, opMax: 0.7, bright: false, sizeMin: 3, sizeMax: 6 },
+  { max: 5, tier: "moderate", count: 40, durMin: 4, durMax: 5.5, opMin: 0.55, opMax: 0.75, bright: false, sizeMin: 3, sizeMax: 7 },
+  { max: 15, tier: "heavy", count: 70, durMin: 3, durMax: 4.5, opMin: 0.6, opMax: 0.8, bright: false, sizeMin: 4, sizeMax: 8 },
+  { max: Infinity, tier: "blizzard", count: 110, durMin: 2, durMax: 3.5, opMin: 0.65, opMax: 0.85, bright: true, sizeMin: 4, sizeMax: 9 },
 ];
 
 function computeSnowFx(w) {
@@ -191,6 +191,9 @@ function renderFallingParticles(container, className, tier) {
     particle.style.setProperty("--duration", `${randomBetween(tier.durMin, tier.durMax)}s`);
     particle.style.setProperty("--delay", `${(Math.random() * -tier.durMax).toFixed(2)}s`);
     particle.style.setProperty("--opacity", randomBetween(tier.opMin, tier.opMax).toFixed(2));
+    if (tier.sizeMin && tier.sizeMax) {
+      particle.style.setProperty("--size", `${randomBetween(tier.sizeMin, tier.sizeMax).toFixed(1)}px`);
+    }
     container.appendChild(particle);
   }
 }
