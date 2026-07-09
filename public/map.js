@@ -65,6 +65,7 @@ function openMapExplorer(lat, lon, callbacks) {
 
 function closeMapExplorer() {
   document.getElementById("mapModal").hidden = true;
+  if (exploreMap) exploreMap.closePopup();
 }
 
 async function handleExploreMapClick(e, callbacks) {
