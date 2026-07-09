@@ -59,6 +59,7 @@ let currentStep = 1;
 let selectedCity = null; // {name, latitude, longitude, country}
 let lastWeather = null;
 let lastRules = null;
+let currentOccasion = { type: null, custom: "" };
 
 // ============================================================
 // DOM 참조
@@ -494,6 +495,10 @@ function bindDashboardEvents() {
     localStorage.removeItem(STORAGE_KEY);
     profile = null;
     selectedCity = null;
+    currentOccasion = { type: null, custom: "" };
+    el("occasionInput").value = "";
+    el("customOccasionInput").hidden = true;
+    el("customOccasionInput").value = "";
     homeBtn.hidden = true;
     showOnboarding();
   });
@@ -511,10 +516,20 @@ function bindDashboardEvents() {
     if (e.target.id === "evidenceModal") closeEvidenceModal();
   });
 
-  el("outfitTableRefreshBtn").addEventListener("click", () => {
-    if (!lastWeather) return;
-    const table = buildOutfitTable(profile, lastWeather);
-    renderOutfitTable(el("outfitTableBody"), table);
+  el("outfitTableRefreshBtn").addEventListener("click", refreshOutfitOnly);
+
+  el("occasionInput").addEventListener("change", () => {
+    const val = el("occasionInput").value;
+    const customInput = el("customOccasionInput");
+    customInput.hidden = val !== "other";
+    if (val !== "other") customInput.value = "";
+    currentOccasion = { type: val || null, custom: "" };
+    refreshOutfitOnly();
+  });
+
+  el("customOccasionInput").addEventListener("input", () => {
+    currentOccasion = { type: "other", custom: el("customOccasionInput").value.trim() };
+    refreshOutfitOnly();
   });
 
   el("openWardrobeBtn").addEventListener("click", () => {
@@ -535,7 +550,7 @@ function bindDashboardEvents() {
     profile.wardrobe = (profile.wardrobe || []).filter((item) => item.id !== btn.dataset.wardrobeId);
     saveProfile(profile);
     renderWardrobeList();
-    refreshOutfitTableIfPossible();
+    refreshOutfitOnly();
   });
 }
 
@@ -771,8 +786,9 @@ function buildRecommendations(profile, w) {
     hair: buildHairRec(profile, w),
     skin: buildSkinRecs(profile, w),
     makeup: profile.wantsMakeup ? buildMakeupRecs(profile, w) : null,
-    outfit: buildOutfitRec(profile, w),
+    outfit: buildOutfitRec(profile, w, currentOccasion),
     outfitTable: buildOutfitTable(profile, w),
+    wardrobeCombos: buildWardrobeCombos(profile, w, 3),
   };
 }
 
@@ -1018,6 +1034,41 @@ function styleOutfitHint(profile) {
   return STYLE_OUTFIT_HINT[profile.styleType] || "";
 }
 
+const OCCASION_LABEL = {
+  work: "출근/등교",
+  date: "데이트",
+  exercise: "운동",
+  travel: "여행",
+  event: "모임/행사",
+  rest: "집에서 휴식",
+  casual_outing: "가벼운 외출",
+  other: "기타",
+};
+
+const OCCASION_HINT = {
+  work: "출근 준비라면 단정하고 깔끔한 인상을 주는 아이템을 우선해보세요.",
+  date: "데이트라면 포인트가 되는 아이템 하나를 더해 화사하게 연출해보세요.",
+  exercise: "운동하러 간다면 신축성 있고 땀 흡수가 잘 되는 소재를 우선하세요.",
+  travel: "여행이라면 편하게 움직이기 좋은 실루엣과 튼튼한 신발을 챙기세요.",
+  event: "모임·행사라면 평소보다 조금 더 격식 있는 아이템으로 포인트를 주세요.",
+  rest: "집에서 쉬는 날이라면 편안한 소재 위주로 가볍게 입어도 좋아요.",
+  casual_outing: "가벼운 외출이라면 평소 즐기는 편한 아이템으로 충분해요.",
+};
+
+function occasionLabel(occasion) {
+  if (!occasion || !occasion.type) return null;
+  if (occasion.type === "other" && occasion.custom) return occasion.custom;
+  return OCCASION_LABEL[occasion.type] || null;
+}
+
+function occasionHint(occasion) {
+  if (!occasion || !occasion.type) return "";
+  if (occasion.type === "other" && occasion.custom) {
+    return `${occasion.custom}에 어울리게 매치해보세요.`;
+  }
+  return OCCASION_HINT[occasion.type] || "";
+}
+
 const OUTFIT_TABLE = {
   casual: {
     top: {
@@ -1174,10 +1225,10 @@ function renderWardrobeList() {
     .join("");
 }
 
-function refreshOutfitTableIfPossible() {
+function refreshOutfitOnly() {
   if (!lastWeather) return;
-  const table = buildOutfitTable(profile, lastWeather);
-  renderOutfitTable(el("outfitTableBody"), table);
+  lastRules = buildRecommendations(profile, lastWeather);
+  renderRecommendationCards(lastRules);
 }
 
 async function handleWardrobePhotoSelected(e) {
@@ -1219,7 +1270,7 @@ async function handleWardrobePhotoSelected(e) {
 
     statusEl.textContent = "의상을 등록했어요!";
     renderWardrobeList();
-    refreshOutfitTableIfPossible();
+    refreshOutfitOnly();
   } catch (err) {
     statusEl.textContent = "사진을 처리하지 못했어요. 다시 시도해주세요.";
   }
@@ -1255,7 +1306,7 @@ function buildOutfitTable(profile, w) {
   return { top, bottom, socks, shoes };
 }
 
-function buildOutfitRec(profile, w) {
+function buildOutfitRec(profile, w, occasion) {
   let advice = OUTFIT_BASE[w.tempBand];
   if (w.isRainy) advice += " 우산과 방수가 되는 신발도 챙기세요.";
   if (w.isSnowy) advice += " 눈길 미끄럼을 막아줄 신발을 신어주세요.";
@@ -1264,10 +1315,31 @@ function buildOutfitRec(profile, w) {
   const styleHint = styleOutfitHint(profile);
   if (styleHint) advice += ` ${styleHint}`;
 
+  const occHint = occasionHint(occasion);
+  if (occHint) advice += ` ${occHint}`;
+
+  const label = occasionLabel(occasion);
   return {
-    situation: `${TEMP_BAND_LABEL[w.tempBand]} · 최고 ${Math.round(w.tempMax)}° / 최저 ${Math.round(w.tempMin)}°`,
+    situation: `${label ? label + " · " : ""}${TEMP_BAND_LABEL[w.tempBand]} · 최고 ${Math.round(w.tempMax)}° / 최저 ${Math.round(w.tempMin)}°`,
     advice,
   };
+}
+
+function buildWardrobeCombos(profile, w, count) {
+  if ((profile.wardrobe || []).length === 0) return [];
+  const combos = [];
+  const seen = new Set();
+  let attempts = 0;
+  while (combos.length < count && attempts < count * 6) {
+    attempts++;
+    const table = buildOutfitTable(profile, w);
+    if (!table) break;
+    const key = `${table.top.text}|${table.bottom.text}|${table.socks.text}|${table.shoes.text}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    combos.push(table);
+  }
+  return combos;
 }
 
 // ============================================================
@@ -1303,6 +1375,20 @@ function renderRecommendationCards(rules) {
   outfitCard.querySelector(".situation").textContent = rules.outfit.situation;
   outfitCard.querySelector(".advice").textContent = rules.outfit.advice;
   renderOutfitTable(el("outfitTableBody"), rules.outfitTable);
+  renderWardrobeCombos(el("wardrobeCombosSection"), el("wardrobeCombosBody"), rules.wardrobeCombos);
+}
+
+function outfitRowHtml(label, entry) {
+  return `
+    <div class="outfit-table-row">
+      <span class="outfit-table-label">${label}</span>
+      <span>${entry.text}${entry.fromWardrobe ? ' <span class="wardrobe-badge">내 옷</span>' : ""}</span>
+    </div>
+  `;
+}
+
+function outfitRowsHtml(table) {
+  return outfitRowHtml("상의", table.top) + outfitRowHtml("하의", table.bottom) + outfitRowHtml("양말", table.socks) + outfitRowHtml("신발", table.shoes);
 }
 
 function renderOutfitTable(container, table) {
@@ -1313,14 +1399,26 @@ function renderOutfitTable(container, table) {
     return;
   }
   if (refreshBtn) refreshBtn.hidden = false;
+  container.innerHTML = outfitRowsHtml(table);
+}
 
-  const row = (label, entry) => `
-    <div class="outfit-table-row">
-      <span class="outfit-table-label">${label}</span>
-      <span>${entry.text}${entry.fromWardrobe ? ' <span class="wardrobe-badge">내 옷</span>' : ""}</span>
-    </div>
-  `;
-  container.innerHTML = row("상의", table.top) + row("하의", table.bottom) + row("양말", table.socks) + row("신발", table.shoes);
+function renderWardrobeCombos(section, container, combos) {
+  if (!combos || combos.length === 0) {
+    section.hidden = true;
+    container.innerHTML = "";
+    return;
+  }
+  section.hidden = false;
+  container.innerHTML = combos
+    .map(
+      (table, i) => `
+        <div class="wardrobe-combo">
+          <p class="wardrobe-combo-label">조합 ${i + 1}</p>
+          ${outfitRowsHtml(table)}
+        </div>
+      `
+    )
+    .join("");
 }
 
 function tipBlockHtml(tip, showComingSoonHint) {

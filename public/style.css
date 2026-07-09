@@ -971,6 +971,42 @@ main { flex: 1; padding: 8px 20px 40px; }
   font-size: 0.85rem;
 }
 
+.occasion-field {
+  margin-bottom: 10px;
+}
+.occasion-field > span {
+  font-size: 0.78rem;
+  margin-bottom: 4px;
+}
+.occasion-field select {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+.occasion-custom-input {
+  width: 100%;
+  margin: -4px 0 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 0.85rem;
+}
+
+.wardrobe-combos-section .wardrobe-combo {
+  padding: 10px 0;
+  border-top: 1px dashed var(--line);
+}
+.wardrobe-combos-section .wardrobe-combo:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.wardrobe-combo-label {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
 .outfit-table-section {
   margin-top: 14px;
   padding-top: 12px;

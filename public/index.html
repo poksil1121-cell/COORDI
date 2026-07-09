@@ -194,6 +194,21 @@
 
         <article class="rec-card" id="outfitCard">
           <h3><span class="card-icon">👕</span>오늘의 코디</h3>
+          <label class="field occasion-field">
+            <span>오늘 일정 (선택)</span>
+            <select id="occasionInput">
+              <option value="">선택 안 함</option>
+              <option value="work">출근/등교</option>
+              <option value="date">데이트</option>
+              <option value="exercise">운동</option>
+              <option value="travel">여행</option>
+              <option value="event">모임/행사</option>
+              <option value="rest">집에서 휴식</option>
+              <option value="casual_outing">가벼운 외출</option>
+              <option value="other">기타</option>
+            </select>
+          </label>
+          <input type="text" id="customOccasionInput" class="occasion-custom-input" placeholder="일정을 직접 입력해보세요 (예: 면접)" hidden />
           <p class="situation"></p>
           <p class="advice"></p>
           <div class="outfit-table-section">
@@ -201,6 +216,11 @@
             <div id="outfitTableBody"></div>
             <button type="button" id="outfitTableRefreshBtn" class="btn btn-secondary btn-outfit-refresh">🔄 다른 조합 보기</button>
             <button type="button" id="openWardrobeBtn" class="btn btn-ghost btn-outfit-refresh">👕 내 의상 관리</button>
+          </div>
+
+          <div class="outfit-table-section wardrobe-combos-section" id="wardrobeCombosSection" hidden>
+            <h4>내 옷으로 만든 코디 추천</h4>
+            <div id="wardrobeCombosBody"></div>
           </div>
 
           <div class="outfit-table-section style-reference-section">
