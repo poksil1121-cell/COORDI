@@ -352,21 +352,30 @@ async function showDashboard() {
 
 // ── 날씨 조회 ────────────────────────────────────────────
 async function fetchWeather(lat, lon) {
-  const url =
+  const weatherUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code` +
     `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max,weather_code` +
     `&timezone=auto&forecast_days=1`;
+  const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,dust&timezone=auto`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("weather fetch failed");
-  const data = await res.json();
-  return classifyWeather(data);
+  const [weatherRes, airRes] = await Promise.all([fetch(weatherUrl), fetch(airUrl).catch(() => null)]);
+  if (!weatherRes.ok) throw new Error("weather fetch failed");
+  const data = await weatherRes.json();
+
+  let air = {};
+  if (airRes && airRes.ok) {
+    const airData = await airRes.json();
+    air = airData.current || {};
+  }
+
+  return classifyWeather(data, air);
 }
 
-function classifyWeather(data) {
+function classifyWeather(data, air) {
   const cur = data.current || {};
   const daily = data.daily || {};
+  const airCur = air || {};
 
   const humidity = cur.relative_humidity_2m ?? 50;
   const tempNow = cur.temperature_2m ?? 20;
@@ -379,6 +388,9 @@ function classifyWeather(data) {
   const precipSum = daily.precipitation_sum?.[0] ?? 0;
   const uv = daily.uv_index_max?.[0] ?? 0;
   const code = cur.weather_code ?? daily.weather_code?.[0] ?? 0;
+  const pm10 = airCur.pm10 ?? 0;
+  const pm2_5 = airCur.pm2_5 ?? 0;
+  const dust = airCur.dust ?? 0;
 
   const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
   const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -389,6 +401,10 @@ function classifyWeather(data) {
   const isDry = humidity <= 35;
   const isWindy = wind >= 20;
   const isHighUV = uv >= 6;
+  const isHail = code === 96 || code === 99;
+  const isThunder = code === 95 || code === 96 || code === 99;
+  const isFoggy = code === 45 || code === 48;
+  const isCloudy = !isRainy && !isSnowy && (code === 2 || code === 3);
 
   let tempBand;
   if (tempMax >= 28) tempBand = "very_hot";
@@ -417,12 +433,19 @@ function classifyWeather(data) {
     precipSum,
     uv,
     code,
+    pm10,
+    pm2_5,
+    dust,
     isRainy,
     isSnowy,
     isHumid,
     isDry,
     isWindy,
     isHighUV,
+    isHail,
+    isThunder,
+    isFoggy,
+    isCloudy,
     tempBand,
     theme,
   };
