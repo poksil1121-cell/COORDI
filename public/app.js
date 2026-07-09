@@ -779,6 +779,28 @@ function findProduct(products, category) {
   return (products || []).find((p) => p.category === category);
 }
 
+function hasBatchim(word) {
+  const trimmed = (word || "").trim();
+  const code = trimmed.charCodeAt(trimmed.length - 1);
+  if (code < 0xac00 || code > 0xd7a3) return false;
+  return (code - 0xac00) % 28 !== 0;
+}
+
+function batchimIsRieul(word) {
+  const trimmed = (word || "").trim();
+  const code = trimmed.charCodeAt(trimmed.length - 1);
+  if (code < 0xac00 || code > 0xd7a3) return false;
+  return (code - 0xac00) % 28 === 8;
+}
+
+function withObjectParticle(word) {
+  return `${word}${hasBatchim(word) ? "을" : "를"}`;
+}
+
+function withInstrumentParticle(word) {
+  return `${word}${hasBatchim(word) && !batchimIsRieul(word) ? "으로" : "로"}`;
+}
+
 const CURLY_TYPES = ["wavy", "curly", "coily"];
 
 function buildRecommendations(profile, w) {
@@ -787,8 +809,8 @@ function buildRecommendations(profile, w) {
     skin: buildSkinRecs(profile, w),
     makeup: profile.wantsMakeup ? buildMakeupRecs(profile, w) : null,
     outfit: buildOutfitRec(profile, w, currentOccasion),
-    outfitTable: buildOutfitTable(profile, w),
-    wardrobeCombos: buildWardrobeCombos(profile, w, 3),
+    outfitTable: buildOutfitTable(profile, w, currentOccasion),
+    wardrobeCombos: buildWardrobeCombos(profile, w, 3, currentOccasion),
   };
 }
 
@@ -859,7 +881,7 @@ function buildHairRec(profile, w) {
     if (isCurly) {
       evidence = HAIR_EVIDENCE_HUMID_CURLY;
       if (fix) {
-        advice = `습한 날엔 컬이 쉽게 풀려요. ${fix.name}로 평소보다 고정을 한 단계 더 확실하게 해주는 게 좋아요.`;
+        advice = `습한 날엔 컬이 쉽게 풀려요. ${withInstrumentParticle(fix.name)} 평소보다 고정을 한 단계 더 확실하게 해주는 게 좋아요.`;
         tag = "owned";
       } else {
         advice = `습한 날엔 곱슬·웨이브 모발의 컬이 쉽게 풀려요. 홀드력이 강한 헤어 스프레이나 무스를 준비해두면 스타일이 오래 유지돼요.`;
@@ -867,14 +889,14 @@ function buildHairRec(profile, w) {
       }
     } else {
       evidence = HAIR_EVIDENCE_HUMID_STRAIGHT;
-      advice = `직모도 습한 날엔 붕뜸이나 부스스함이 생기기 쉬워요. ${fix ? fix.name + "를 " : "가벼운 고정 스프레이를 "}뿌리 쪽에 살짝 뿌려주면 도움이 돼요.`;
+      advice = `직모도 습한 날엔 붕뜸이나 부스스함이 생기기 쉬워요. ${fix ? withObjectParticle(fix.name) + " " : "가벼운 고정 스프레이를 "}뿌리 쪽에 살짝 뿌려주면 도움이 돼요.`;
       tag = fix ? "owned" : "neutral";
     }
   } else if (w.isDry) {
     situation = `습도 ${Math.round(w.humidity)}% · 건조`;
     evidence = HAIR_EVIDENCE_DRY;
     if (moist) {
-      advice = `건조한 날엔 모발도 정전기와 갈라짐이 생기기 쉬워요. ${moist.name}를 평소보다 조금 더 발라 마무리해주세요.`;
+      advice = `건조한 날엔 모발도 정전기와 갈라짐이 생기기 쉬워요. ${withObjectParticle(moist.name)} 평소보다 조금 더 발라 마무리해주세요.`;
       tag = "owned";
     } else {
       advice = `건조한 날엔 모발 정전기가 심해질 수 있어요. 헤어 에센스나 오일 타입 제품을 발라 마무리하면 도움이 돼요.`;
@@ -920,7 +942,7 @@ function buildSkinRecs(profile, w) {
     tips.push({
       situation: `습도 ${Math.round(w.humidity)}% · 건조`,
       advice: m
-        ? `${m.name}를 평소보다 한 겹 더 덧발라 수분 손실을 막아주세요.`
+        ? `${withObjectParticle(m.name)} 평소보다 한 겹 더 덧발라 수분 손실을 막아주세요.`
         : `보습 크림이나 로션을 평소보다 두껍게 발라 수분 손실을 막아주는 게 좋아요.`,
       tag: m ? "owned" : "suggested",
       evidence: SKIN_EVIDENCE_DRY,
@@ -932,7 +954,7 @@ function buildSkinRecs(profile, w) {
     tips.push({
       situation: `자외선 지수 ${Math.round(w.uv)}`,
       advice: s
-        ? `${s.name}를 아침에 바르고 2~3시간마다 덧바르는 걸 잊지 마세요.`
+        ? `${withObjectParticle(s.name)} 아침에 바르고 2~3시간마다 덧바르는 걸 잊지 마세요.`
         : `자외선이 강한 날이에요. SPF 30 이상의 선크림을 준비해서 아침에 바르고 2~3시간마다 덧바르는 걸 추천해요.`,
       tag: s ? "owned" : "suggested",
       evidence: SKIN_EVIDENCE_UV,
@@ -944,7 +966,7 @@ function buildSkinRecs(profile, w) {
     tips.push({
       situation: `고온·다습`,
       advice: mist
-        ? `${mist.name}로 중간중간 피부를 가볍게 정돈해주세요. 유분이 늘어날 수 있으니 산뜻한 제품 위주로 마무리하는 걸 추천해요.`
+        ? `${withInstrumentParticle(mist.name)} 중간중간 피부를 가볍게 정돈해주세요. 유분이 늘어날 수 있으니 산뜻한 제품 위주로 마무리하는 걸 추천해요.`
         : `유분이 늘어나기 쉬운 날씨예요. 산뜻한 미스트나 가벼운 텍스처의 제품으로 마무리해보세요.`,
       tag: mist ? "owned" : "suggested",
       evidence: SKIN_EVIDENCE_HUMID,
@@ -968,9 +990,9 @@ function buildMakeupRecs(profile, w) {
     const fixer = findProduct(profile.products, "makeup_fix");
     const oilc = findProduct(profile.products, "makeup_oilcontrol");
     let advice = fixer
-      ? `베이스 마무리 후 ${fixer.name}로 픽싱해주세요.`
+      ? `베이스 마무리 후 ${withInstrumentParticle(fixer.name)} 픽싱해주세요.`
       : `픽서 스프레이로 마무리하면 화장이 오래 유지돼요. 없다면 픽싱 기능이 있는 제품을 구비해보세요.`;
-    if (oilc) advice += ` 중간중간 ${oilc.name}로 유분만 가볍게 정리하면 더 오래가요.`;
+    if (oilc) advice += ` 중간중간 ${withInstrumentParticle(oilc.name)} 유분만 가볍게 정리하면 더 오래가요.`;
     tips.push({ situation: "고온·다습 · 화장 무너짐 주의", advice, tag: fixer ? "owned" : "suggested" });
   }
 
@@ -1276,14 +1298,44 @@ async function handleWardrobePhotoSelected(e) {
   }
 }
 
-function wardrobeOption(profile, category) {
+const OCCASION_WARDROBE_KEYWORDS = {
+  exercise: ["트레이닝", "스포티", "조거", "레깅스", "후드", "운동", "러닝", "메쉬"],
+  event: ["셔츠", "재킷", "블레이저", "슬랙스", "코트", "정장", "드레스", "힐", "로퍼"],
+};
+
+// 운동/행사는 스타일 취향보다 실용성이 우선이라 카탈로그 풀 자체를 교체하고,
+// 그 외 상황(출근·데이트 등)은 buildOutfitRec의 문장 힌트로만 반영한다.
+const OCCASION_ITEM_OVERRIDE = {
+  exercise: {
+    top: {
+      hot: ["기능성 반팔 티셔츠", "메쉬 소재 반팔 상의", "스포츠 탱크탑"],
+      mild: ["기능성 긴팔 집업", "트레이닝 후드", "윈드브레이커"],
+      cold: ["기능성 플리스 집업", "패딩 트레이닝 재킷", "기모 트레이닝 상의"],
+    },
+    bottom: ["트레이닝 조거 팬츠", "레깅스", "숏 트레이닝 팬츠", "트랙 팬츠"],
+    shoes: ["러닝화", "트레이닝화", "쿠셔닝 스니커즈"],
+  },
+  event: {
+    top: {
+      hot: ["린넨 반팔 셔츠", "슬리브리스 블라우스", "니트 베스트"],
+      mild: ["단정한 셔츠", "니트 가디건", "블레이저"],
+      cold: ["울 코트", "트렌치 코트", "테일러드 재킷"],
+    },
+    bottom: ["슬랙스", "정장 팬츠", "미디 스커트", "테일러드 팬츠"],
+    shoes: ["로퍼", "옥스포드 슈즈", "미니멀 힐", "클래식 플랫"],
+  },
+};
+
+function wardrobeOption(profile, category, occasion) {
   const items = (profile.wardrobe || []).filter((item) => item.category === category);
   if (items.length === 0) return null;
-  const item = pickRandom(items);
+  const keywords = occasion && occasion.type ? OCCASION_WARDROBE_KEYWORDS[occasion.type] : null;
+  const matched = keywords ? items.filter((item) => keywords.some((k) => item.style.includes(k))) : [];
+  const item = pickRandom(matched.length > 0 ? matched : items);
   return { text: `${item.style} · ${item.color}`, fromWardrobe: true };
 }
 
-function buildOutfitTable(profile, w) {
+function buildOutfitTable(profile, w, occasion) {
   const table = OUTFIT_TABLE[profile.styleType];
   if (!table) return null;
 
@@ -1293,11 +1345,16 @@ function buildOutfitTable(profile, w) {
     ? "cold"
     : "mild";
 
-  const top = wardrobeOption(profile, "top") || { text: pickCombo(table.top[tempGroup], table.topColors), fromWardrobe: false };
-  const bottom = wardrobeOption(profile, "bottom") || { text: pickCombo(table.bottom, table.bottomColors), fromWardrobe: false };
-  const socks = wardrobeOption(profile, "socks") || { text: pickCombo(table.socks, table.socksColors), fromWardrobe: false };
+  const override = occasion && occasion.type ? OCCASION_ITEM_OVERRIDE[occasion.type] : null;
+  const topItems = override ? override.top[tempGroup] : table.top[tempGroup];
+  const bottomItems = override ? override.bottom : table.bottom;
+  const shoesItems = override ? override.shoes : table.shoes;
 
-  const shoesOption = wardrobeOption(profile, "shoes") || { text: pickCombo(table.shoes, table.shoesColors), fromWardrobe: false };
+  const top = wardrobeOption(profile, "top", occasion) || { text: pickCombo(topItems, table.topColors), fromWardrobe: false };
+  const bottom = wardrobeOption(profile, "bottom", occasion) || { text: pickCombo(bottomItems, table.bottomColors), fromWardrobe: false };
+  const socks = wardrobeOption(profile, "socks", occasion) || { text: pickCombo(table.socks, table.socksColors), fromWardrobe: false };
+
+  const shoesOption = wardrobeOption(profile, "shoes", occasion) || { text: pickCombo(shoesItems, table.shoesColors), fromWardrobe: false };
   let shoesText = shoesOption.text;
   if (w.isRainy) shoesText += " (방수 소재 추천)";
   if (w.isSnowy) shoesText += " (미끄럼 방지 밑창 추천)";
@@ -1325,14 +1382,14 @@ function buildOutfitRec(profile, w, occasion) {
   };
 }
 
-function buildWardrobeCombos(profile, w, count) {
+function buildWardrobeCombos(profile, w, count, occasion) {
   if ((profile.wardrobe || []).length === 0) return [];
   const combos = [];
   const seen = new Set();
   let attempts = 0;
   while (combos.length < count && attempts < count * 6) {
     attempts++;
-    const table = buildOutfitTable(profile, w);
+    const table = buildOutfitTable(profile, w, occasion);
     if (!table) break;
     const key = `${table.top.text}|${table.bottom.text}|${table.socks.text}|${table.shoes.text}`;
     if (seen.has(key)) continue;
