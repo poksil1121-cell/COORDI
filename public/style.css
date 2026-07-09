@@ -799,3 +799,6 @@ main { flex: 1; padding: 8px 20px 40px; }
 .mini-map .leaflet-control-attribution {
   font-size: 9px;
 }
+.weather-content .mini-map {
+  margin-top: 20px;
+}

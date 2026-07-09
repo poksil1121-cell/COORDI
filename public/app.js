@@ -604,10 +604,13 @@ function renderWeatherPanel(w) {
         ${gaugeHtml("강수", `${Math.round(w.precipProb)}%`, w.precipProb)}
         ${gaugeHtml("자외선", `${Math.round(w.uv)}`, Math.min(100, w.uv * 9))}
       </div>
+
+      <div id="dashboardMiniMap" class="mini-map"></div>
     </div>
   `;
 
   renderWeatherFx(el("weatherFx"), w);
+  createMiniMap(el("dashboardMiniMap"), profile.region.latitude, profile.region.longitude);
 }
 
 function gaugeHtml(label, value, pct) {
