@@ -308,6 +308,8 @@ main { flex: 1; padding: 8px 20px 40px; }
    날씨 패널 (계기판 느낌의 시그니처 요소)
    ============================================================ */
 .weather-panel {
+  position: relative;
+  overflow: hidden;
   margin-top: 10px;
   border-radius: var(--radius-lg);
   padding: 22px;
@@ -316,6 +318,19 @@ main { flex: 1; padding: 8px 20px 40px; }
   box-shadow: var(--shadow-card);
   transition: background 0.5s ease;
 }
+
+.weather-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: background 0.6s ease;
+}
+.weather-fx.weather-fx--dark { background: rgba(0, 0, 0, 0.18); }
+.weather-fx.weather-fx--warm { background: radial-gradient(circle at 80% 15%, rgba(255, 170, 60, 0.22), transparent 60%); }
+
+.weather-content { position: relative; z-index: 1; }
 
 .weather-loading {
   text-align: center;

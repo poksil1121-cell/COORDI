@@ -392,26 +392,31 @@ function renderWeatherPanel(w) {
   const dateStr = today.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
 
   el("weatherPanel").innerHTML = `
-    <div class="weather-head">
-      <div>
-        <p class="weather-location">📍 ${profile.region.name}</p>
-        <p class="weather-date">${dateStr}</p>
+    <div class="weather-fx" id="weatherFx"></div>
+    <div class="weather-content">
+      <div class="weather-head">
+        <div>
+          <p class="weather-location">📍 ${profile.region.name}</p>
+          <p class="weather-date">${dateStr}</p>
+        </div>
+        <span class="weather-condition">${TEMP_BAND_LABEL[w.tempBand]}${w.isRainy ? " · 비" : ""}${w.isSnowy ? " · 눈" : ""}</span>
       </div>
-      <span class="weather-condition">${TEMP_BAND_LABEL[w.tempBand]}${w.isRainy ? " · 비" : ""}${w.isSnowy ? " · 눈" : ""}</span>
-    </div>
 
-    <div class="weather-temp">
-      <span class="now">${Math.round(w.tempNow)}°</span>
-      <span class="range">${Math.round(w.tempMin)}° / ${Math.round(w.tempMax)}°</span>
-    </div>
+      <div class="weather-temp">
+        <span class="now">${Math.round(w.tempNow)}°</span>
+        <span class="range">${Math.round(w.tempMin)}° / ${Math.round(w.tempMax)}°</span>
+      </div>
 
-    <div class="gauge-row">
-      ${gaugeHtml("습도", `${Math.round(w.humidity)}%`, w.humidity)}
-      ${gaugeHtml("바람", `${Math.round(w.wind)}`, Math.min(100, w.wind * 2.5))}
-      ${gaugeHtml("강수", `${Math.round(w.precipProb)}%`, w.precipProb)}
-      ${gaugeHtml("자외선", `${Math.round(w.uv)}`, Math.min(100, w.uv * 9))}
+      <div class="gauge-row">
+        ${gaugeHtml("습도", `${Math.round(w.humidity)}%`, w.humidity)}
+        ${gaugeHtml("바람", `${Math.round(w.wind)}`, Math.min(100, w.wind * 2.5))}
+        ${gaugeHtml("강수", `${Math.round(w.precipProb)}%`, w.precipProb)}
+        ${gaugeHtml("자외선", `${Math.round(w.uv)}`, Math.min(100, w.uv * 9))}
+      </div>
     </div>
   `;
+
+  renderWeatherFx(el("weatherFx"), w);
 }
 
 function gaugeHtml(label, value, pct) {
