@@ -108,6 +108,14 @@ function showOnboarding(prefill) {
     el("wantsMakeupInput").checked = !!prefill.wantsMakeup;
     el("hairTypeInput").value = prefill.hairType || "straight";
     el("skinTypeInput").value = prefill.skinType || "combination";
+    el("styleTypeInput").value = prefill.styleType || "casual";
+    if (prefill.styleType === "other" && prefill.customStyle) {
+      el("customStyleInput").hidden = false;
+      el("customStyleInput").value = prefill.customStyle;
+    } else {
+      el("customStyleInput").hidden = true;
+      el("customStyleInput").value = "";
+    }
     selectedCity = prefill.region || null;
     if (selectedCity) showSelectedCity(selectedCity);
 
@@ -118,6 +126,9 @@ function showOnboarding(prefill) {
   } else {
     el("nicknameInput").value = "";
     el("ageInput").value = "";
+    el("styleTypeInput").value = "casual";
+    el("customStyleInput").hidden = true;
+    el("customStyleInput").value = "";
     el("productList").innerHTML = "";
     el("cityResults").innerHTML = "";
     el("selectedCity").hidden = true;
@@ -159,6 +170,12 @@ function bindOnboardingEvents() {
       e.preventDefault();
       handleCitySearch();
     }
+  });
+
+  el("styleTypeInput").addEventListener("change", () => {
+    const custom = el("customStyleInput");
+    custom.hidden = el("styleTypeInput").value !== "other";
+    if (el("styleTypeInput").value !== "other") custom.value = "";
   });
 
   el("addProductBtn").addEventListener("click", () => addProductRow());
@@ -418,16 +435,23 @@ function collectProfileFromForm() {
     })
     .filter((p) => p.name.length > 0);
 
-  return {
+  const styleType = el("styleTypeInput").value;
+  const profileData = {
     nickname: el("nicknameInput").value.trim(),
     age: el("ageInput").value ? Number(el("ageInput").value) : null,
     gender: el("genderInput").value,
     wantsMakeup: el("wantsMakeupInput").checked,
     hairType: el("hairTypeInput").value,
     skinType: el("skinTypeInput").value,
+    styleType,
     region: selectedCity,
     products,
   };
+  if (styleType === "other") {
+    const customStyle = el("customStyleInput").value.trim();
+    if (customStyle) profileData.customStyle = customStyle;
+  }
+  return profileData;
 }
 
 function renderSummary() {
@@ -441,7 +465,8 @@ function renderSummary() {
     <b>닉네임</b> ${p.nickname || "-"} · <b>나이</b> ${p.age ?? "-"}<br/>
     <b>지역</b> ${p.region ? p.region.name : "-"}<br/>
     <b>성별</b> ${GENDER_LABEL[p.gender]} · <b>메이크업 추천</b> ${p.wantsMakeup ? "받음" : "받지 않음"}<br/>
-    <b>모발</b> ${HAIR_LABEL[p.hairType]} · <b>피부</b> ${SKIN_LABEL[p.skinType]}<br/><br/>
+    <b>모발</b> ${HAIR_LABEL[p.hairType]} · <b>피부</b> ${SKIN_LABEL[p.skinType]}<br/>
+    <b>코디 스타일</b> ${p.styleType === "other" && p.customStyle ? p.customStyle : STYLE_LABEL[p.styleType]}<br/><br/>
     <b>보유 제품</b><br/>${productLines}
   `;
 }
@@ -706,7 +731,7 @@ function buildRecommendations(profile, w) {
     hair: buildHairRec(profile, w),
     skin: buildSkinRecs(profile, w),
     makeup: profile.wantsMakeup ? buildMakeupRecs(profile, w) : null,
-    outfit: buildOutfitRec(w),
+    outfit: buildOutfitRec(profile, w),
   };
 }
 
@@ -924,11 +949,42 @@ const OUTFIT_BASE = {
   very_cold: "패딩과 목도리·장갑까지 챙기는 걸 추천해요.",
 };
 
-function buildOutfitRec(w) {
+const STYLE_LABEL = {
+  casual: "캐주얼",
+  minimal: "미니멀",
+  street: "스트릿",
+  feminine: "페미닌",
+  classic: "클래식",
+  sporty: "스포티",
+  vintage: "빈티지",
+  other: "기타",
+};
+
+const STYLE_OUTFIT_HINT = {
+  casual: "캐주얼하게 편안한 티셔츠나 데님 위주로 매치해보세요.",
+  minimal: "미니멀하게 무채색 기본템으로 심플하게 매치해보세요.",
+  street: "스트릿하게 오버사이즈 아우터나 스니커즈를 포인트로 매치해보세요.",
+  feminine: "페미닌하게 부드러운 소재나 플레어 실루엣으로 매치해보세요.",
+  classic: "클래식하게 단정한 셔츠나 슬랙스로 깔끔하게 매치해보세요.",
+  sporty: "스포티하게 트레이닝복이나 스니커즈 룩으로 활동적으로 매치해보세요.",
+  vintage: "빈티지하게 레트로 무드의 아이템으로 개성 있게 매치해보세요.",
+};
+
+function styleOutfitHint(profile) {
+  if (profile.styleType === "other" && profile.customStyle) {
+    return `${profile.customStyle} 스타일에 맞게 매치해보세요.`;
+  }
+  return STYLE_OUTFIT_HINT[profile.styleType] || "";
+}
+
+function buildOutfitRec(profile, w) {
   let advice = OUTFIT_BASE[w.tempBand];
   if (w.isRainy) advice += " 우산과 방수가 되는 신발도 챙기세요.";
   if (w.isSnowy) advice += " 눈길 미끄럼을 막아줄 신발을 신어주세요.";
   if (w.isWindy) advice += " 바람이 강하니 방풍 소재의 아우터가 도움이 돼요.";
+
+  const styleHint = styleOutfitHint(profile);
+  if (styleHint) advice += ` ${styleHint}`;
 
   return {
     situation: `${TEMP_BAND_LABEL[w.tempBand]} · 최고 ${Math.round(w.tempMax)}° / 최저 ${Math.round(w.tempMin)}°`,
