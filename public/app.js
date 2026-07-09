@@ -445,6 +445,18 @@ function renderSummary() {
 function bindDashboardEvents() {
   settingsBtn.addEventListener("click", () => showOnboarding(profile));
   el("aiRecommendBtn").addEventListener("click", requestAiComment);
+
+  el("cardsGrid").addEventListener("click", (e) => {
+    const trigger = e.target.closest(".evidence-trigger");
+    if (!trigger) return;
+    const id = Number(trigger.dataset.evidenceId);
+    const evidence = evidenceRegistry[id];
+    if (evidence) openEvidenceModal(evidence);
+  });
+  el("evidenceModalClose").addEventListener("click", closeEvidenceModal);
+  el("evidenceModal").addEventListener("click", (e) => {
+    if (e.target.id === "evidenceModal") closeEvidenceModal();
+  });
 }
 
 async function showDashboard() {
@@ -674,16 +686,72 @@ function buildRecommendations(profile, w) {
   };
 }
 
+const HAIR_EVIDENCE_HUMID_CURLY = {
+  summary: "습도가 높으면 모발 큐티클이 부풀어 컬이 쉽게 풀려요.",
+  rationale:
+    "모발은 케라틴 단백질의 수소결합으로 형태가 유지되는데, 대기 습도가 높아지면 수분이 케라틴에 흡수되며 이 결합이 약해져 웨이브·컬이 쉽게 펴지거나 부스스해져요. 홀드력이 강한 스타일링 제품(스프레이, 무스)은 모발 표면에 방수 피막을 만들어 외부 수분 흡수를 줄여줘요.",
+  source: "일반적으로 알려진 모발과학(트라이콜로지) 원리예요.",
+};
+const HAIR_EVIDENCE_HUMID_STRAIGHT = {
+  summary: "습도가 높으면 모발이 붕뜨고 부스스해지기 쉬워요.",
+  rationale:
+    "습한 공기에서는 모발 표면의 정전기 균형과 큐티클 결이 흐트러지기 쉬워, 직모도 뿌리가 붕 뜨거나 잔머리가 일어나기 쉬워요. 가벼운 고정 스프레이는 모발 표면에 얇은 피막을 형성해 형태를 붙잡아줘요.",
+  source: "일반적으로 알려진 모발과학 원리예요.",
+};
+const HAIR_EVIDENCE_DRY = {
+  summary: "건조한 공기는 모발의 수분을 빼앗아 정전기와 갈라짐을 유발해요.",
+  rationale:
+    "모발 큐티클층이 건조해지면 표면이 거칠어지고 정전기가 발생하기 쉬우며, 모발 내부 수분이 부족하면 끝이 갈라지기 쉬워요. 에센스나 오일 타입 제품은 모발 표면에 유분막을 형성해 수분 증발을 줄여줘요.",
+  source: "일반적으로 알려진 모발과학 원리예요.",
+};
+
+let evidenceRegistry = [];
+
+function registerEvidence(evidence) {
+  evidenceRegistry.push(evidence);
+  return evidenceRegistry.length - 1;
+}
+
+function renderEvidenceTrigger(trigger, evidence) {
+  if (!trigger) return;
+  if (!evidence) {
+    trigger.hidden = true;
+    return;
+  }
+  trigger.hidden = false;
+  trigger.textContent = "💡 전문가 팁";
+  trigger.dataset.tooltip = evidence.summary;
+  trigger.dataset.evidenceId = registerEvidence(evidence);
+}
+
+function openEvidenceModal(evidence) {
+  el("evidenceModalBody").innerHTML = `
+    <h3>💡 전문가 팁</h3>
+    <p class="evidence-summary">${evidence.summary}</p>
+    <h4>근거</h4>
+    <p class="evidence-rationale">${evidence.rationale}</p>
+    <h4>출처</h4>
+    <p class="evidence-source">${evidence.source}</p>
+    <p class="evidence-disclaimer">이 설명은 일반적인 정보이며 개인 피부·모발 상태에 따라 다를 수 있어요. 증상이 지속되면 전문가와 상담해주세요.</p>
+  `;
+  el("evidenceModal").hidden = false;
+}
+
+function closeEvidenceModal() {
+  el("evidenceModal").hidden = true;
+}
+
 function buildHairRec(profile, w) {
   const fix = findProduct(profile.products, "hair_fix");
   const moist = findProduct(profile.products, "hair_moisture");
   const isCurly = CURLY_TYPES.includes(profile.hairType);
 
-  let situation, advice, tag;
+  let situation, advice, tag, evidence;
 
   if (w.isRainy || w.isHumid) {
     situation = `습도 ${Math.round(w.humidity)}%${w.isRainy ? " · 비 소식" : ""}`;
     if (isCurly) {
+      evidence = HAIR_EVIDENCE_HUMID_CURLY;
       if (fix) {
         advice = `습한 날엔 컬이 쉽게 풀려요. ${fix.name}로 평소보다 고정을 한 단계 더 확실하게 해주는 게 좋아요.`;
         tag = "owned";
@@ -692,11 +760,13 @@ function buildHairRec(profile, w) {
         tag = "suggested";
       }
     } else {
+      evidence = HAIR_EVIDENCE_HUMID_STRAIGHT;
       advice = `직모도 습한 날엔 붕뜸이나 부스스함이 생기기 쉬워요. ${fix ? fix.name + "를 " : "가벼운 고정 스프레이를 "}뿌리 쪽에 살짝 뿌려주면 도움이 돼요.`;
       tag = fix ? "owned" : "neutral";
     }
   } else if (w.isDry) {
     situation = `습도 ${Math.round(w.humidity)}% · 건조`;
+    evidence = HAIR_EVIDENCE_DRY;
     if (moist) {
       advice = `건조한 날엔 모발도 정전기와 갈라짐이 생기기 쉬워요. ${moist.name}를 평소보다 조금 더 발라 마무리해주세요.`;
       tag = "owned";
@@ -714,7 +784,7 @@ function buildHairRec(profile, w) {
     advice += ` 바람이 강한 날이니 스타일링 마무리 고정을 한 번 더 체크해보세요.`;
   }
 
-  return { situation, advice, tag };
+  return { situation, advice, tag, evidence };
 }
 
 function buildSkinRecs(profile, w) {
@@ -824,12 +894,15 @@ function buildOutfitRec(w) {
 // 카드 렌더링
 // ============================================================
 function renderRecommendationCards(rules) {
+  evidenceRegistry = [];
+
   const hairCard = el("hairCard");
   hairCard.querySelector(".situation").textContent = rules.hair.situation;
   hairCard.querySelector(".advice").textContent = rules.hair.advice;
   const hairTag = hairCard.querySelector(".tag");
   hairTag.textContent = tagLabel(rules.hair.tag);
   hairTag.className = `tag ${rules.hair.tag}`;
+  renderEvidenceTrigger(hairCard.querySelector(".evidence-trigger"), rules.hair.evidence);
 
   el("skinCard").querySelector(".skin-tips").innerHTML = rules.skin.map(tipBlockHtml).join("");
 

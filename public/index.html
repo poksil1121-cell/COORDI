@@ -152,6 +152,7 @@
           <p class="situation"></p>
           <p class="advice"></p>
           <span class="tag"></span>
+          <button type="button" class="evidence-trigger tooltip-trigger" hidden></button>
         </article>
 
         <article class="rec-card" id="skinCard">
@@ -189,6 +190,13 @@
   <div class="map-modal-inner">
     <button type="button" id="mapModalClose" class="icon-btn map-modal-close" title="닫기">✕</button>
     <div id="exploreMap" class="explore-map"></div>
+  </div>
+</div>
+
+<div id="evidenceModal" class="map-modal" hidden>
+  <div class="map-modal-inner evidence-modal-inner">
+    <button type="button" id="evidenceModalClose" class="icon-btn map-modal-close" title="닫기">✕</button>
+    <div id="evidenceModalBody" class="evidence-modal-body"></div>
   </div>
 </div>
 
