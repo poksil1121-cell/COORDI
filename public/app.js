@@ -166,7 +166,7 @@ async function handleCitySearch() {
   try {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
       query
-    )}&count=5&language=ko&format=json`;
+    )}&count=10&language=ko&format=json`;
     const res = await fetch(url);
     const data = await res.json();
 
@@ -178,7 +178,8 @@ async function handleCitySearch() {
 
     data.results.forEach((r) => {
       const li = document.createElement("li");
-      const region = r.admin1 ? `${r.admin1} · ` : "";
+      const adminParts = [r.admin2, r.admin1].filter(Boolean).join(" · ");
+      const region = adminParts ? `${adminParts} · ` : "";
       li.textContent = `${r.name} (${region}${r.country || ""})`;
       li.addEventListener("click", () => {
         selectedCity = {
