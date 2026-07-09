@@ -607,3 +607,126 @@ main { flex: 1; padding: 8px 20px 40px; }
     animation: none !important;
   }
 }
+
+/* ============================================================
+   날씨 패널 FX — 우박 · 눈 · 황사/미세먼지 · 안개 · 흐림 · 번개 · 폭풍
+   ============================================================ */
+.hailstone {
+  position: absolute;
+  left: var(--left);
+  top: -8%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  opacity: var(--opacity);
+  animation: hailfall var(--duration) linear var(--delay) infinite;
+}
+@keyframes hailfall {
+  0% { top: -8%; }
+  100% { top: 100%; }
+}
+
+.snowflake {
+  position: absolute;
+  left: var(--left);
+  top: -6%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  opacity: var(--opacity);
+  animation: snowfall var(--duration) ease-in-out var(--delay) infinite;
+}
+@keyframes snowfall {
+  0% { top: -6%; transform: translateX(0); }
+  50% { transform: translateX(10px); }
+  100% { top: 110%; transform: translateX(-10px); }
+}
+.weather-fx.weather-fx--snowbright { background: rgba(255, 255, 255, 0.12); }
+
+.haze-particle {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  animation: hazeDrift var(--duration) ease-in-out var(--delay) infinite;
+}
+@keyframes hazeDrift {
+  0%, 100% { transform: translateX(0); opacity: 0.3; }
+  50% { transform: translateX(14px); opacity: 0.6; }
+}
+.weather-fx.weather-fx--dust { background: rgba(196, 154, 68, var(--haze-opacity, 0.2)); }
+.weather-fx.weather-fx--fine { background: rgba(140, 140, 140, var(--haze-opacity, 0.2)); }
+
+.fog-band {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: var(--top);
+  height: 22%;
+  background: rgba(255, 255, 255, var(--fog-opacity, 0.25));
+  filter: blur(6px);
+  animation: fogDrift 9s ease-in-out var(--delay) infinite;
+}
+@keyframes fogDrift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6%); }
+}
+
+.cloud-blob {
+  position: absolute;
+  left: -30%;
+  top: var(--top);
+  width: 55%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, var(--opacity));
+  filter: blur(4px);
+  animation: cloudDrift var(--duration) linear var(--delay) infinite;
+}
+@keyframes cloudDrift {
+  from { transform: translateX(0); }
+  to { transform: translateX(160%); }
+}
+
+.lightning-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  animation: lightningFlash var(--flash-interval) ease-out infinite;
+}
+@keyframes lightningFlash {
+  0%, 92% { opacity: 0; }
+  93% { opacity: var(--flash-opacity); }
+  94% { opacity: 0; }
+  96% { opacity: var(--flash-opacity); }
+  100% { opacity: 0; }
+}
+
+.wind-streak {
+  position: absolute;
+  left: -10%;
+  top: var(--top);
+  width: 40%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(8deg);
+  animation: windStreak 0.9s linear var(--delay) infinite;
+}
+@keyframes windStreak {
+  from { transform: translateX(0) rotate(8deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  to { transform: translateX(220%) rotate(8deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hailstone, .snowflake, .haze-particle, .fog-band, .cloud-blob, .lightning-flash, .wind-streak {
+    animation: none !important;
+  }
+}

@@ -156,47 +156,118 @@ function randomBetween(min, max) {
 function renderWeatherFx(container, w) {
   if (!container) return;
   container.innerHTML = "";
-  container.classList.remove("weather-fx--dark", "weather-fx--warm");
+  container.classList.remove(
+    "weather-fx--dark",
+    "weather-fx--warm",
+    "weather-fx--dust",
+    "weather-fx--fine",
+    "weather-fx--snowbright"
+  );
+  container.style.removeProperty("--haze-opacity");
+  container.style.removeProperty("--fog-opacity");
 
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
 
-  const rain = computeRainFx(w);
-  if (rain) {
-    container.classList.toggle("weather-fx--dark", !!rain.dark);
-    for (let i = 0; i < rain.count; i++) {
-      const drop = document.createElement("span");
-      drop.className = "raindrop";
-      drop.style.setProperty("--left", `${Math.random() * 100}%`);
-      drop.style.setProperty("--duration", `${randomBetween(rain.durMin, rain.durMax)}s`);
-      drop.style.setProperty("--delay", `${(Math.random() * -rain.durMax).toFixed(2)}s`);
-      drop.style.setProperty("--opacity", randomBetween(rain.opMin, rain.opMax).toFixed(2));
-      container.appendChild(drop);
-    }
-  }
+  const sky = computeSkyFx(w);
+  if (sky) renderSkyLayer(container, sky);
 
-  const sun = computeSunFx(w);
-  if (sun) {
+  const lightning = computeLightningFx(w);
+  if (lightning) {
+    const flash = document.createElement("div");
+    flash.className = "lightning-flash";
+    flash.style.setProperty("--flash-interval", `${lightning.flashInterval}s`);
+    flash.style.setProperty("--flash-opacity", lightning.flashOpacity);
+    container.appendChild(flash);
+  }
+}
+
+function renderFallingParticles(container, className, tier) {
+  for (let i = 0; i < tier.count; i++) {
+    const particle = document.createElement("span");
+    particle.className = className;
+    particle.style.setProperty("--left", `${Math.random() * 100}%`);
+    particle.style.setProperty("--duration", `${randomBetween(tier.durMin, tier.durMax)}s`);
+    particle.style.setProperty("--delay", `${(Math.random() * -tier.durMax).toFixed(2)}s`);
+    particle.style.setProperty("--opacity", randomBetween(tier.opMin, tier.opMax).toFixed(2));
+    container.appendChild(particle);
+  }
+}
+
+function renderSkyLayer(container, sky) {
+  if (sky.type === "hail") {
+    container.classList.toggle("weather-fx--dark", !!sky.dark);
+    renderFallingParticles(container, "hailstone", sky);
+    if (sky.storm) renderWindStreaks(container);
+  } else if (sky.type === "snow") {
+    container.classList.toggle("weather-fx--snowbright", !!sky.bright);
+    renderFallingParticles(container, "snowflake", sky);
+  } else if (sky.type === "rain") {
+    container.classList.toggle("weather-fx--dark", !!sky.dark);
+    renderFallingParticles(container, "raindrop", sky);
+    if (sky.storm) renderWindStreaks(container);
+  } else if (sky.type === "haze") {
+    container.classList.add(sky.tint === "dust" ? "weather-fx--dust" : "weather-fx--fine");
+    container.style.setProperty("--haze-opacity", sky.overlayOpacity);
+    for (let i = 0; i < sky.particleCount; i++) {
+      const particle = document.createElement("span");
+      particle.className = "haze-particle";
+      particle.style.setProperty("--left", `${Math.random() * 100}%`);
+      particle.style.setProperty("--top", `${Math.random() * 100}%`);
+      particle.style.setProperty("--duration", `${randomBetween(6, 12).toFixed(2)}s`);
+      particle.style.setProperty("--delay", `${(Math.random() * -10).toFixed(2)}s`);
+      container.appendChild(particle);
+    }
+  } else if (sky.type === "fog") {
+    container.style.setProperty("--fog-opacity", sky.opacity);
+    for (let i = 0; i < sky.bandCount; i++) {
+      const band = document.createElement("div");
+      band.className = "fog-band";
+      band.style.setProperty("--top", `${20 + i * 30}%`);
+      band.style.setProperty("--delay", `${i * -3}s`);
+      container.appendChild(band);
+    }
+  } else if (sky.type === "cloud") {
+    for (let i = 0; i < sky.blobCount; i++) {
+      const blob = document.createElement("div");
+      blob.className = "cloud-blob";
+      blob.style.setProperty("--top", `${10 + i * 18}%`);
+      blob.style.setProperty("--opacity", sky.opacity);
+      blob.style.setProperty("--duration", `${randomBetween(18, 28).toFixed(2)}s`);
+      blob.style.setProperty("--delay", `${(i * -6).toFixed(2)}s`);
+      container.appendChild(blob);
+    }
+  } else if (sky.type === "sun") {
     const glow = document.createElement("div");
     glow.className = "sun-glow";
-    glow.style.setProperty("--pulse-duration", `${sun.pulseDuration}s`);
+    glow.style.setProperty("--pulse-duration", `${sky.pulseDuration}s`);
     container.appendChild(glow);
 
-    if (sun.rays) {
+    if (sky.rays) {
       const rays = document.createElement("div");
       rays.className = "sun-rays";
-      rays.style.setProperty("--rotate-duration", `${sun.rayDuration}s`);
+      rays.style.setProperty("--rotate-duration", `${sky.rayDuration}s`);
       container.appendChild(rays);
     }
 
-    if (sun.shimmer) {
+    if (sky.shimmer) {
       const shimmer = document.createElement("div");
-      shimmer.className = `heat-shimmer heat-shimmer--${sun.shimmerLevel}`;
+      shimmer.className = `heat-shimmer heat-shimmer--${sky.shimmerLevel}`;
       container.appendChild(shimmer);
     }
 
-    container.classList.toggle("weather-fx--warm", !!sun.warm);
+    container.classList.toggle("weather-fx--warm", !!sky.warm);
+  }
+}
+
+function renderWindStreaks(container) {
+  for (let i = 0; i < 8; i++) {
+    const streak = document.createElement("span");
+    streak.className = "wind-streak";
+    streak.style.setProperty("--top", `${Math.random() * 100}%`);
+    streak.style.setProperty("--delay", `${(Math.random() * -2).toFixed(2)}s`);
+    container.appendChild(streak);
   }
 }
 
