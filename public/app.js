@@ -1021,78 +1021,110 @@ function styleOutfitHint(profile) {
 const OUTFIT_TABLE = {
   casual: {
     top: {
-      hot: ["루즈핏 반팔 티셔츠 · 화이트", "그래픽 반팔 티셔츠 · 베이지"],
-      mild: ["오버사이즈 스웨트셔츠 · 그레이", "체크 셔츠 · 레드"],
-      cold: ["후드 집업 + 히트텍 이너 · 네이비", "무스탕 자켓 · 브라운"],
+      hot: ["루즈핏 반팔 티셔츠", "그래픽 반팔 티셔츠", "카라 반팔 티셔츠", "린넨 반팔 셔츠"],
+      mild: ["오버사이즈 스웨트셔츠", "체크 셔츠", "코튼 후드 집업", "데님 셔츠"],
+      cold: ["후드 집업 + 히트텍 이너", "무스탕 자켓", "퀼팅 자켓", "울 블렌드 코트"],
     },
-    bottom: ["스트레이트 데님 팬츠 · 블루", "와이드 치노 팬츠 · 베이지"],
-    socks: ["무지 크루 삭스 · 화이트", "스트라이프 삭스 · 네이비"],
-    shoes: ["캔버스 스니커즈 · 화이트", "로우탑 스니커즈 · 블랙"],
+    topColors: ["화이트", "베이지", "그레이", "네이비", "블루"],
+    bottom: ["스트레이트 데님 팬츠", "와이드 치노 팬츠", "카고 팬츠", "코듀로이 팬츠"],
+    bottomColors: ["블루", "베이지", "카키", "블랙"],
+    socks: ["무지 크루 삭스", "스트라이프 삭스", "레터링 삭스"],
+    socksColors: ["화이트", "네이비", "그레이"],
+    shoes: ["캔버스 스니커즈", "로우탑 스니커즈", "데크슈즈"],
+    shoesColors: ["화이트", "블랙", "베이지"],
   },
   minimal: {
     top: {
-      hot: ["무지 반팔 티셔츠 · 오프화이트", "리브 니트 탱크 + 셔츠 · 그레이"],
-      mild: ["라운드넥 니트 · 그레이", "심플 셋업 재킷 · 베이지"],
-      cold: ["울 코트 + 터틀넥 · 차콜", "롱 니트 가디건 · 아이보리"],
+      hot: ["무지 반팔 티셔츠", "리브 니트 탱크", "카라 반팔 니트", "심플 슬리브리스"],
+      mild: ["라운드넥 니트", "심플 셋업 재킷", "하프넥 니트", "셔츠 재킷"],
+      cold: ["울 코트", "롱 니트 가디건", "캐시미어 터틀넥", "무지 패딩"],
     },
-    bottom: ["테이퍼드 슬랙스 · 블랙", "스트레이트 슬랙스 · 그레이"],
-    socks: ["발목 삭스 · 블랙", "무지 크루 삭스 · 화이트"],
-    shoes: ["미니멀 로퍼 · 블랙", "화이트 스니커즈 · 화이트"],
+    topColors: ["화이트", "그레이", "블랙", "아이보리", "차콜"],
+    bottom: ["테이퍼드 슬랙스", "스트레이트 슬랙스", "와이드 슬랙스", "셋업 팬츠"],
+    bottomColors: ["블랙", "그레이", "베이지", "차콜"],
+    socks: ["발목 삭스", "무지 크루 삭스", "로우컷 삭스"],
+    socksColors: ["블랙", "화이트", "그레이"],
+    shoes: ["미니멀 로퍼", "화이트 스니커즈", "첼시부츠"],
+    shoesColors: ["블랙", "화이트", "그레이"],
   },
   street: {
     top: {
-      hot: ["그래픽 반팔 티셔츠 · 블랙", "박시 반팔 · 화이트"],
-      mild: ["오버사이즈 후드 + 워크자켓 · 카키", "빅사이즈 체크셔츠 · 레드"],
-      cold: ["패딩 아우터 + 후드 레이어드 · 블랙", "롱패딩 + 그래픽 후드 · 카키"],
+      hot: ["그래픽 반팔 티셔츠", "박시 반팔", "오버사이즈 나시", "타이다이 반팔"],
+      mild: ["오버사이즈 후드", "워크자켓", "빅사이즈 체크셔츠", "데님 자켓"],
+      cold: ["패딩 아우터 + 후드 레이어드", "롱패딩", "아노락 자켓", "보아 후드집업"],
     },
-    bottom: ["와이드 카고 팬츠 · 카키", "배기 데님 팬츠 · 블루"],
-    socks: ["로고 크루 삭스 · 화이트", "레터링 삭스 · 블랙"],
-    shoes: ["청키 스니커즈 · 화이트/블랙", "하이탑 스니커즈 · 블랙"],
+    topColors: ["블랙", "화이트", "카키", "레드", "그레이"],
+    bottom: ["와이드 카고 팬츠", "배기 데님 팬츠", "트랙 팬츠", "오버사이즈 슬랙스"],
+    bottomColors: ["카키", "블루", "블랙", "그레이"],
+    socks: ["로고 크루 삭스", "레터링 삭스", "스트라이프 삭스"],
+    socksColors: ["화이트", "블랙", "네온"],
+    shoes: ["청키 스니커즈", "하이탑 스니커즈", "워커 부츠"],
+    shoesColors: ["화이트/블랙", "블랙", "베이지"],
   },
   feminine: {
     top: {
-      hot: ["프릴 블라우스 · 라이트핑크", "레이스 반팔 탑 · 화이트"],
-      mild: ["니트 가디건 + 슬립 원피스 · 아이보리", "퍼프소매 블라우스 · 라벤더"],
-      cold: ["울 코트 + 니트 레이어드 · 베이지", "무스탕 코트 · 아이보리"],
+      hot: ["프릴 블라우스", "레이스 반팔 탑", "셔링 크롭탑", "리본 블라우스"],
+      mild: ["니트 가디건", "퍼프소매 블라우스", "튜닉 블라우스", "브이넥 니트"],
+      cold: ["울 코트", "무스탕 코트", "퍼트리밍 코트", "니트 원피스"],
     },
-    bottom: ["플레어 스커트 · 라벤더", "롱 플리츠 스커트 · 베이지"],
-    socks: ["레이스 삭스 · 화이트", "리본 삭스 · 아이보리"],
-    shoes: ["메리제인 플랫 · 베이지", "리본 플랫슈즈 · 화이트"],
+    topColors: ["라이트핑크", "아이보리", "라벤더", "화이트", "베이지"],
+    bottom: ["플레어 스커트", "롱 플리츠 스커트", "슬립 스커트", "와이드 슬랙스"],
+    bottomColors: ["라벤더", "베이지", "아이보리", "핑크"],
+    socks: ["레이스 삭스", "리본 삭스", "시어 삭스"],
+    socksColors: ["화이트", "아이보리", "핑크"],
+    shoes: ["메리제인 플랫", "리본 플랫슈즈", "로퍼"],
+    shoesColors: ["베이지", "화이트", "브라운"],
   },
   classic: {
     top: {
-      hot: ["린넨 셔츠 · 라이트블루", "피케 카라 티셔츠 · 네이비"],
-      mild: ["브이넥 니트 + 셔츠 레이어드 · 네이비", "트위드 재킷 · 그레이"],
-      cold: ["울 코트 + 셔츠 · 그레이", "캐시미어 코트 · 차콜"],
+      hot: ["린넨 셔츠", "피케 카라 티셔츠", "옥스포드 셔츠", "크루넥 니트"],
+      mild: ["브이넥 니트 + 셔츠", "트위드 재킷", "헤링본 재킷", "가디건"],
+      cold: ["울 코트", "캐시미어 코트", "더플코트", "트렌치코트"],
     },
-    bottom: ["슬랙스 · 차콜", "테일러드 팬츠 · 네이비"],
-    socks: ["발목 삭스 · 네이비", "무지 삭스 · 그레이"],
-    shoes: ["로퍼 · 브라운", "더비 슈즈 · 블랙"],
+    topColors: ["네이비", "그레이", "화이트", "브라운", "차콜"],
+    bottom: ["슬랙스", "테일러드 팬츠", "코듀로이 팬츠", "울 팬츠"],
+    bottomColors: ["차콜", "네이비", "그레이", "브라운"],
+    socks: ["발목 삭스", "무지 삭스", "다이아몬드 패턴 삭스"],
+    socksColors: ["네이비", "그레이", "브라운"],
+    shoes: ["로퍼", "더비 슈즈", "옥스포드 슈즈"],
+    shoesColors: ["브라운", "블랙", "버건디"],
   },
   sporty: {
     top: {
-      hot: ["드라이핏 반팔 티셔츠 · 블랙", "메시 반팔 저지 · 네온"],
-      mild: ["트레이닝 재킷 · 네이비/화이트", "후디 · 그레이"],
-      cold: ["플리스 집업 + 패딩 베스트 · 블랙", "롱패딩 스포츠 라인 · 네이비"],
+      hot: ["드라이핏 반팔 티셔츠", "메시 반팔 저지", "탱크탑", "폴로 카라 티셔츠"],
+      mild: ["트레이닝 재킷", "후디", "윈드브레이커", "플리스 집업"],
+      cold: ["패딩 베스트 + 플리스", "롱패딩 스포츠 라인", "다운 재킷", "기모 후드집업"],
     },
-    bottom: ["조거 팬츠 · 블랙", "트랙 팬츠 · 네이비"],
-    socks: ["스포츠 크루 삭스 · 화이트", "쿠셔닝 삭스 · 블랙"],
-    shoes: ["러닝화 · 화이트/네온", "트레이닝화 · 블랙"],
+    topColors: ["블랙", "네이비", "화이트", "네온", "그레이"],
+    bottom: ["조거 팬츠", "트랙 팬츠", "레깅스", "카고 조거"],
+    bottomColors: ["블랙", "네이비", "그레이"],
+    socks: ["스포츠 크루 삭스", "쿠셔닝 삭스", "로우컷 스포츠 삭스"],
+    socksColors: ["화이트", "블랙", "네온"],
+    shoes: ["러닝화", "트레이닝화", "하이탑 스포츠 슈즈"],
+    shoesColors: ["화이트/네온", "블랙", "그레이"],
   },
   vintage: {
     top: {
-      hot: ["레트로 스트라이프 반팔 · 브라운톤", "하와이안 셔츠 · 그린"],
-      mild: ["체크 니트 베스트 + 셔츠 · 머스타드", "코듀로이 셔츠 · 브라운"],
-      cold: ["코듀로이 자켓 · 카멜", "빈티지 무스탕 · 브라운"],
+      hot: ["레트로 스트라이프 반팔", "하와이안 셔츠", "니트 폴로", "체크 반팔 셔츠"],
+      mild: ["체크 니트 베스트 + 셔츠", "코듀로이 셔츠", "니트 가디건", "트위드 베스트"],
+      cold: ["코듀로이 자켓", "빈티지 무스탕", "체크 울 코트", "레트로 더플코트"],
     },
-    bottom: ["와이드 코듀로이 팬츠 · 브라운", "스트레이트 진 · 워시블루"],
-    socks: ["레트로 스트라이프 삭스 · 크림", "무지 울 삭스 · 브라운"],
-    shoes: ["로퍼 또는 첼시부츠 · 브라운", "레트로 러닝화 · 크림"],
+    topColors: ["브라운톤", "머스타드", "카멜", "그린", "크림"],
+    bottom: ["와이드 코듀로이 팬츠", "스트레이트 진", "니트 팬츠", "체크 슬랙스"],
+    bottomColors: ["브라운", "워시블루", "크림", "카키"],
+    socks: ["레트로 스트라이프 삭스", "무지 울 삭스", "다이아몬드 삭스"],
+    socksColors: ["크림", "브라운", "머스타드"],
+    shoes: ["로퍼", "첼시부츠", "레트로 러닝화"],
+    shoesColors: ["브라운", "크림", "버건디"],
   },
 };
 
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickCombo(items, colors) {
+  return `${pickRandom(items)} · ${pickRandom(colors)}`;
 }
 
 const WARDROBE_CATEGORY_LABEL = { top: "상의", bottom: "하의", socks: "양말", shoes: "신발", outer: "아우터" };
@@ -1210,11 +1242,11 @@ function buildOutfitTable(profile, w) {
     ? "cold"
     : "mild";
 
-  const top = wardrobeOption(profile, "top") || { text: pickRandom(table.top[tempGroup]), fromWardrobe: false };
-  const bottom = wardrobeOption(profile, "bottom") || { text: pickRandom(table.bottom), fromWardrobe: false };
-  const socks = wardrobeOption(profile, "socks") || { text: pickRandom(table.socks), fromWardrobe: false };
+  const top = wardrobeOption(profile, "top") || { text: pickCombo(table.top[tempGroup], table.topColors), fromWardrobe: false };
+  const bottom = wardrobeOption(profile, "bottom") || { text: pickCombo(table.bottom, table.bottomColors), fromWardrobe: false };
+  const socks = wardrobeOption(profile, "socks") || { text: pickCombo(table.socks, table.socksColors), fromWardrobe: false };
 
-  const shoesOption = wardrobeOption(profile, "shoes") || { text: pickRandom(table.shoes), fromWardrobe: false };
+  const shoesOption = wardrobeOption(profile, "shoes") || { text: pickCombo(table.shoes, table.shoesColors), fromWardrobe: false };
   let shoesText = shoesOption.text;
   if (w.isRainy) shoesText += " (방수 소재 추천)";
   if (w.isSnowy) shoesText += " (미끄럼 방지 밑창 추천)";
