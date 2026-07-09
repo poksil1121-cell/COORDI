@@ -229,7 +229,17 @@ function showSelectedCity(city) {
 
   const mapEl = el("regionMiniMap");
   mapEl.hidden = false;
-  createMiniMap(mapEl, city.latitude, city.longitude);
+  createMiniMap(mapEl, city.latitude, city.longitude, () => {
+    openMapExplorer(city.latitude, city.longitude, {
+      onFetchWeatherHtml: fetchQuickWeatherHtml,
+      onSelectLocation: async (lat, lon) => {
+        const name = await reverseGeocode(lat, lon);
+        selectedCity = { name, latitude: lat, longitude: lon, country: "" };
+        showSelectedCity(selectedCity);
+        el("toStep2").disabled = false;
+      },
+    });
+  });
 }
 
 async function handleUseMyLocation() {
@@ -288,6 +298,19 @@ async function reverseGeocode(lat, lon) {
     return secondary ? `${primary} · ${secondary}` : primary;
   } catch {
     return "현재 위치";
+  }
+}
+
+async function fetchQuickWeatherHtml(lat, lon) {
+  try {
+    const [name, w] = await Promise.all([reverseGeocode(lat, lon), fetchWeather(lat, lon)]);
+    return `
+      <p class="map-popup-title">📍 ${name}</p>
+      <p class="map-popup-temp">${Math.round(w.tempNow)}° · ${TEMP_BAND_LABEL[w.tempBand]}${w.isRainy ? " · 비" : ""}${w.isSnowy ? " · 눈" : ""}</p>
+      <p class="map-popup-detail">강수 ${Math.round(w.precipProb)}% · 자외선 ${Math.round(w.uv)}</p>
+    `;
+  } catch (err) {
+    return `<p class="map-popup-loading">날씨를 가져오지 못했어요.</p>`;
   }
 }
 
@@ -610,7 +633,17 @@ function renderWeatherPanel(w) {
   `;
 
   renderWeatherFx(el("weatherFx"), w);
-  createMiniMap(el("dashboardMiniMap"), profile.region.latitude, profile.region.longitude);
+  createMiniMap(el("dashboardMiniMap"), profile.region.latitude, profile.region.longitude, () => {
+    openMapExplorer(profile.region.latitude, profile.region.longitude, {
+      onFetchWeatherHtml: fetchQuickWeatherHtml,
+      onSelectLocation: async (lat, lon) => {
+        const name = await reverseGeocode(lat, lon);
+        profile.region = { name, latitude: lat, longitude: lon, country: "" };
+        saveProfile(profile);
+        showDashboard();
+      },
+    });
+  });
 }
 
 function gaugeHtml(label, value, pct) {
