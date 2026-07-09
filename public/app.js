@@ -55,7 +55,7 @@ const el = (id) => document.getElementById(id);
 
 const onboardingView = el("onboarding");
 const dashboardView = el("dashboard");
-const settingsBtn = el("settingsBtn");
+const homeBtn = el("homeBtn");
 const brandMark = el("brandMark");
 
 // ============================================================
@@ -68,7 +68,7 @@ function init() {
   bindDashboardEvents();
 
   if (profile) {
-    settingsBtn.hidden = false;
+    homeBtn.hidden = false;
     showDashboard();
   } else {
     showOnboarding();
@@ -162,7 +162,7 @@ function bindOnboardingEvents() {
   el("finishOnboarding").addEventListener("click", () => {
     const p = collectProfileFromForm();
     saveProfile(p);
-    settingsBtn.hidden = false;
+    homeBtn.hidden = false;
     showDashboard();
   });
 }
@@ -443,7 +443,15 @@ function renderSummary() {
 // 대시보드
 // ============================================================
 function bindDashboardEvents() {
-  settingsBtn.addEventListener("click", () => showOnboarding(profile));
+  homeBtn.addEventListener("click", () => {
+    const confirmed = window.confirm("정말 처음부터 다시 시작하시겠어요? 기존에 입력한 내용이 모두 사라져요.");
+    if (!confirmed) return;
+    localStorage.removeItem(STORAGE_KEY);
+    profile = null;
+    selectedCity = null;
+    homeBtn.hidden = true;
+    showOnboarding();
+  });
   el("aiRecommendBtn").addEventListener("click", requestAiComment);
 
   el("cardsGrid").addEventListener("click", (e) => {
