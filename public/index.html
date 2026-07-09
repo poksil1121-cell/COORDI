@@ -185,19 +185,26 @@
 <!-- 제품 항목 템플릿 -->
 <template id="productRowTemplate">
   <div class="product-row">
-    <input type="text" class="product-name" placeholder="제품 이름 (예: 스트롱 홀드 헤어스프레이)" />
+    <input type="text" class="product-name" placeholder="제품 이름 (예: 아토베리어 365 크림)" autocomplete="off" />
     <select class="product-category">
       <option value="hair_fix">헤어 고정 (스프레이/무스/젤)</option>
-      <option value="hair_moisture">헤어 보습 (에센스/오일)</option>
+      <option value="hair_moisture">헤어 보습/영양 (에센스/오일)</option>
+      <option value="hair_treatment">헤어 트리트먼트/팩</option>
+      <option value="scalp_care">두피 케어</option>
       <option value="skin_moisture">스킨 보습 (크림/로션)</option>
+      <option value="skin_toner">토너/스킨</option>
+      <option value="skin_serum">에센스/세럼/앰플</option>
       <option value="skin_mist">스킨 미스트/수분 부스터</option>
       <option value="skin_sun">선크림/자외선 차단</option>
+      <option value="skin_soothing">진정 케어</option>
       <option value="makeup_base">메이크업 베이스(프라이머/파운데이션)</option>
       <option value="makeup_fix">메이크업 픽서 스프레이</option>
       <option value="makeup_oilcontrol">피지컨트롤/파우더</option>
+      <option value="makeup_lip">립 제품</option>
       <option value="other">기타</option>
     </select>
     <button type="button" class="remove-product-btn" title="삭제">✕</button>
+    <input type="text" class="product-custom-category" placeholder="카테고리 직접 입력 (예: 향수)" hidden />
   </div>
 </template>
 

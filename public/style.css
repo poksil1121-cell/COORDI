@@ -315,6 +315,17 @@ main { flex: 1; padding: 8px 20px 40px; }
 }
 .remove-product-btn:hover { background: #ffe3e3; color: #c0392b; }
 
+.product-custom-category {
+  grid-column: 1 / -1;
+  margin-top: -2px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 0.85rem;
+  width: 100%;
+}
+
 .summary-box {
   background: var(--surface-soft);
   border-radius: var(--radius-md);

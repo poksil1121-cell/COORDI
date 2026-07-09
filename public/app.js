@@ -8,15 +8,26 @@ const SKIN_LABEL = { dry: "건성", oily: "지성", combination: "복합성", se
 const GENDER_LABEL = { female: "여성", male: "남성", other: "선택 안 함" };
 const CATEGORY_LABEL = {
   hair_fix: "헤어 고정",
-  hair_moisture: "헤어 보습",
+  hair_moisture: "헤어 보습/영양",
+  hair_treatment: "헤어 트리트먼트/팩",
+  scalp_care: "두피 케어",
   skin_moisture: "스킨 보습",
+  skin_toner: "토너/스킨",
+  skin_serum: "에센스/세럼/앰플",
   skin_mist: "스킨 미스트",
   skin_sun: "선크림",
+  skin_soothing: "진정 케어",
   makeup_base: "메이크업 베이스",
   makeup_fix: "메이크업 픽서",
   makeup_oilcontrol: "피지컨트롤",
+  makeup_lip: "립 제품",
   other: "기타",
 };
+
+function categoryLabel(product) {
+  if (product.category === "other" && product.customCategory) return product.customCategory;
+  return CATEGORY_LABEL[product.category] || CATEGORY_LABEL.other;
+}
 
 // 날씨 상태 → accent 컬러 (디자인 토큰의 --accent, --accent-ink를 실시간으로 바꿔줌)
 const WEATHER_THEME = {
@@ -268,20 +279,40 @@ async function reverseGeocode(lat, lon) {
 function addProductRow(existing) {
   const tpl = el("productRowTemplate");
   const node = tpl.content.firstElementChild.cloneNode(true);
+  const nameInput = node.querySelector(".product-name");
+  const categorySelect = node.querySelector(".product-category");
+  const customInput = node.querySelector(".product-custom-category");
+
   if (existing) {
-    node.querySelector(".product-name").value = existing.name || "";
-    node.querySelector(".product-category").value = existing.category || "other";
+    nameInput.value = existing.name || "";
+    categorySelect.value = existing.category || "other";
+    if (existing.category === "other" && existing.customCategory) {
+      customInput.hidden = false;
+      customInput.value = existing.customCategory;
+    }
   }
+
+  categorySelect.addEventListener("change", () => {
+    customInput.hidden = categorySelect.value !== "other";
+    if (categorySelect.value !== "other") customInput.value = "";
+  });
+
   node.querySelector(".remove-product-btn").addEventListener("click", () => node.remove());
   el("productList").appendChild(node);
 }
 
 function collectProfileFromForm() {
   const products = Array.from(document.querySelectorAll(".product-row"))
-    .map((row) => ({
-      name: row.querySelector(".product-name").value.trim(),
-      category: row.querySelector(".product-category").value,
-    }))
+    .map((row) => {
+      const name = row.querySelector(".product-name").value.trim();
+      const category = row.querySelector(".product-category").value;
+      const product = { name, category };
+      if (category === "other") {
+        const custom = row.querySelector(".product-custom-category").value.trim();
+        if (custom) product.customCategory = custom;
+      }
+      return product;
+    })
     .filter((p) => p.name.length > 0);
 
   return {
@@ -298,7 +329,7 @@ function renderSummary() {
   const p = collectProfileFromForm();
   const productLines =
     p.products.length > 0
-      ? p.products.map((pr) => `· ${pr.name} <span style="color:var(--ink-faint)">(${CATEGORY_LABEL[pr.category]})</span>`).join("<br/>")
+      ? p.products.map((pr) => `· ${pr.name} <span style="color:var(--ink-faint)">(${categoryLabel(pr)})</span>`).join("<br/>")
       : "등록된 제품 없음 — 필요할 때 종류를 제안해드릴게요.";
 
   el("summaryBox").innerHTML = `
