@@ -1,0 +1,17 @@
+{
+  "name": "weather-styling-app",
+  "version": "1.0.0",
+  "description": "날씨(기온·습도·바람·강수량) 데이터를 기반으로 헤어·스킨케어·메이크업·코디를 추천하는 개인 맞춤 서비스",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

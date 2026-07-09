@@ -1,0 +1,496 @@
+/* ============================================================
+   디자인 토큰
+   - accent 컬러는 오늘의 날씨 상태에 따라 JS가 실시간으로 바꿔줍니다.
+     (맑음=amber / 비=blue / 흐림=grey / 눈=cyan / 더움=coral / 추움=periwinkle)
+   ============================================================ */
+:root {
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-soft: #f5f7fb;
+  --ink: #1f2a44;
+  --ink-soft: #5b6580;
+  --ink-faint: #8b93ab;
+  --line: #dde2ec;
+
+  --accent: #4c8bf5;      /* 기본값: 비/맑음 전이 전에 보이는 색 */
+  --accent-ink: #1c3d7a;
+
+  --font-body: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-card: 0 8px 24px -12px rgba(31, 42, 68, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button, input, select {
+  font-family: inherit;
+}
+
+/* ── 상단바 ───────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 8px;
+}
+
+.brand { display: flex; align-items: center; gap: 8px; }
+
+.brand-mark {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent) 18%, white);
+  color: var(--accent-ink);
+  font-size: 16px;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--surface-soft); color: var(--ink); }
+
+/* ── 공통 레이아웃 ───────────────────────────────────── */
+main { flex: 1; padding: 8px 20px 40px; }
+.view { display: block; }
+.view[hidden] { display: none; }
+
+.app-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  padding: 12px 0 24px;
+}
+
+/* ── 버튼 ─────────────────────────────────────────────── */
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.3s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent-ink);
+  color: white;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.9; }
+
+.btn-secondary {
+  background: var(--surface-soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn-secondary:hover { background: var(--line); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+.btn-ai {
+  width: 100%;
+  background: color-mix(in srgb, var(--accent) 14%, white);
+  color: var(--accent-ink);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, white);
+}
+
+.btn-add { width: 100%; margin-top: 10px; }
+
+/* ============================================================
+   온보딩 위저드
+   ============================================================ */
+.wizard-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px 24px 24px;
+  margin-top: 12px;
+}
+
+.steps-indicator {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+.step-dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.step-dot.active,
+.step-dot.done {
+  background: var(--accent-ink);
+}
+
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: fadeUp 0.25s ease; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wizard-step h2 {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+.step-desc {
+  margin: 0 0 20px;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+.field > span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.field select,
+.field input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.field select:focus,
+.field input:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, white);
+  outline-offset: 1px;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.checkbox-field input { width: 18px; height: 18px; }
+.checkbox-field > span { margin: 0; font-weight: 500; color: var(--ink); }
+
+.search-row { display: flex; gap: 8px; }
+.search-row input { flex: 1; }
+
+.city-results {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.city-results li {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+.city-results li:hover { background: var(--line); }
+
+.selected-city {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  color: var(--accent-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* 보유 제품 리스트 */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.product-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.product-row input,
+.product-row select {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 0.85rem;
+  width: 100%;
+}
+.remove-product-btn {
+  border: none;
+  background: var(--surface-soft);
+  color: var(--ink-faint);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.remove-product-btn:hover { background: #ffe3e3; color: #c0392b; }
+
+.summary-box {
+  background: var(--surface-soft);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.summary-box b { color: var(--ink); }
+
+/* ============================================================
+   날씨 패널 (계기판 느낌의 시그니처 요소)
+   ============================================================ */
+.weather-panel {
+  margin-top: 10px;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  background: linear-gradient(160deg, var(--ink) 0%, color-mix(in srgb, var(--ink) 82%, var(--accent)) 100%);
+  color: white;
+  box-shadow: var(--shadow-card);
+  transition: background 0.5s ease;
+}
+
+.weather-loading {
+  text-align: center;
+  padding: 30px 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+.weather-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.weather-location {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin: 0 0 4px;
+}
+.weather-date {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  margin: 0;
+}
+.weather-condition {
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.weather-temp {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.weather-temp .now {
+  font-family: var(--font-mono);
+  font-size: 3.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.weather-temp .range {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  opacity: 0.75;
+  padding-bottom: 6px;
+}
+
+.gauge-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.gauge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.gauge {
+  --pct: 0;
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: conic-gradient(white calc(var(--pct) * 1%), rgba(255, 255, 255, 0.18) 0);
+}
+.gauge-inner {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 90%, black 0%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+.gauge-label {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+/* ============================================================
+   추천 카드
+   ============================================================ */
+.cards-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+.rec-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow-card);
+}
+.rec-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+.card-icon { font-size: 1.1rem; }
+
+.rec-card .situation {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+}
+.rec-card .advice {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.tag {
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.tag.owned { background: color-mix(in srgb, var(--accent) 16%, white); color: var(--accent-ink); }
+.tag.suggested { background: #fff3d6; color: #8a6100; }
+.tag.neutral { background: var(--surface-soft); color: var(--ink-soft); }
+
+.skin-tips, .makeup-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tip-block:not(:last-child) {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.empty-note {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+}
+
+/* ============================================================
+   AI 섹션
+   ============================================================ */
+.ai-section { margin-top: 18px; }
+.ai-result {
+  margin-top: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.ai-result .ai-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--accent) 14%, white);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+.ai-result.error { color: #a94442; }
+
+@media (min-width: 560px) {
+  .cards-grid { grid-template-columns: 1fr 1fr; }
+  #outfitCard { grid-column: 1 / -1; }
+}

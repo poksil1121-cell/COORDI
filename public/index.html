@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>오늘 웨더핏 · 날씨 맞춤 코디 추천</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" id="brandMark" aria-hidden="true">◐</span>
+      <span class="brand-name">오늘 웨더핏</span>
+    </div>
+    <button id="settingsBtn" class="icon-btn" title="프로필 설정" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <main id="main">
+
+    <!-- ───────────────── 온보딩 ───────────────── -->
+    <section id="onboarding" class="view">
+      <div class="wizard-card">
+
+        <div class="steps-indicator" id="stepsIndicator">
+          <span class="step-dot active" data-step="1"></span>
+          <span class="step-dot" data-step="2"></span>
+          <span class="step-dot" data-step="3"></span>
+          <span class="step-dot" data-step="4"></span>
+        </div>
+
+        <!-- STEP 1 : 기본 정보 -->
+        <div class="wizard-step active" data-step="1">
+          <h2>기본 정보를 알려주세요</h2>
+          <p class="step-desc">날씨 조회와 추천 톤을 맞추기 위한 최소한의 정보예요.</p>
+
+          <label class="field">
+            <span>성별</span>
+            <select id="genderInput">
+              <option value="female">여성</option>
+              <option value="male">남성</option>
+              <option value="other">선택하지 않음</option>
+            </select>
+          </label>
+
+          <label class="field checkbox-field">
+            <input type="checkbox" id="wantsMakeupInput" />
+            <span>메이크업 추천도 함께 받을래요</span>
+          </label>
+
+          <label class="field">
+            <span>지역 (도시명으로 검색)</span>
+            <div class="search-row">
+              <input type="text" id="citySearchInput" placeholder="예: 서울, 부산, 제주" />
+              <button type="button" id="citySearchBtn" class="btn btn-secondary">검색</button>
+            </div>
+          </label>
+          <ul id="cityResults" class="city-results"></ul>
+          <div id="selectedCity" class="selected-city" hidden></div>
+
+          <div class="wizard-actions">
+            <span></span>
+            <button type="button" class="btn btn-primary" data-next="2" disabled id="toStep2">다음</button>
+          </div>
+        </div>
+
+        <!-- STEP 2 : 모발 & 피부 -->
+        <div class="wizard-step" data-step="2">
+          <h2>모발과 피부 타입</h2>
+          <p class="step-desc">날씨에 따라 가장 크게 영향을 받는 두 가지예요.</p>
+
+          <label class="field">
+            <span>모발 타입</span>
+            <select id="hairTypeInput">
+              <option value="straight">직모</option>
+              <option value="wavy">반곱슬</option>
+              <option value="curly">곱슬</option>
+              <option value="coily">강한 곱슬</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>피부 타입</span>
+            <select id="skinTypeInput">
+              <option value="dry">건성</option>
+              <option value="oily">지성</option>
+              <option value="combination">복합성</option>
+              <option value="sensitive">민감성</option>
+            </select>
+          </label>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn btn-ghost" data-prev="1">이전</button>
+            <button type="button" class="btn btn-primary" data-next="3">다음</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 : 보유 제품 -->
+        <div class="wizard-step" data-step="3">
+          <h2>가지고 있는 제품을 알려주세요</h2>
+          <p class="step-desc">등록해두면 상황에 맞을 때 해당 제품으로 구체적으로 추천해드려요. 없으면 건너뛰어도 괜찮아요 — 필요한 제품 종류를 대신 제안해드릴게요.</p>
+
+          <div id="productList" class="product-list"></div>
+          <button type="button" id="addProductBtn" class="btn btn-secondary btn-add">+ 제품 추가</button>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn btn-ghost" data-prev="2">이전</button>
+            <button type="button" class="btn btn-primary" data-next="4">다음</button>
+          </div>
+        </div>
+
+        <!-- STEP 4 : 완료 -->
+        <div class="wizard-step" data-step="4">
+          <h2>준비됐어요</h2>
+          <p class="step-desc">입력하신 정보는 이 기기에만 저장되고, 언제든 설정에서 수정할 수 있어요.</p>
+          <div id="summaryBox" class="summary-box"></div>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn btn-ghost" data-prev="3">이전</button>
+            <button type="button" class="btn btn-primary" id="finishOnboarding">오늘의 코디 보기</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── 대시보드 ───────────────── -->
+    <section id="dashboard" class="view" hidden>
+
+      <div class="weather-panel" id="weatherPanel">
+        <div class="weather-loading" id="weatherLoading">날씨를 불러오는 중이에요…</div>
+      </div>
+
+      <div class="cards-grid" id="cardsGrid" hidden>
+        <article class="rec-card" id="hairCard">
+          <h3><span class="card-icon">💇</span>헤어 스타일링</h3>
+          <p class="situation"></p>
+          <p class="advice"></p>
+          <span class="tag"></span>
+        </article>
+
+        <article class="rec-card" id="skinCard">
+          <h3><span class="card-icon">🧴</span>스킨케어</h3>
+          <div class="skin-tips"></div>
+        </article>
+
+        <article class="rec-card" id="makeupCard">
+          <h3><span class="card-icon">💄</span>메이크업</h3>
+          <div class="makeup-tips"></div>
+        </article>
+
+        <article class="rec-card" id="outfitCard">
+          <h3><span class="card-icon">👕</span>오늘의 코디</h3>
+          <p class="situation"></p>
+          <p class="advice"></p>
+        </article>
+      </div>
+
+      <div class="ai-section" id="aiSection" hidden>
+        <button type="button" id="aiRecommendBtn" class="btn btn-ai">🤖 AI에게 코디 조언 더 받기</button>
+        <div id="aiResult" class="ai-result" hidden></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <span>날씨 데이터 제공: Open-Meteo</span>
+  </footer>
+</div>
+
+<!-- 제품 항목 템플릿 -->
+<template id="productRowTemplate">
+  <div class="product-row">
+    <input type="text" class="product-name" placeholder="제품 이름 (예: 스트롱 홀드 헤어스프레이)" />
+    <select class="product-category">
+      <option value="hair_fix">헤어 고정 (스프레이/무스/젤)</option>
+      <option value="hair_moisture">헤어 보습 (에센스/오일)</option>
+      <option value="skin_moisture">스킨 보습 (크림/로션)</option>
+      <option value="skin_mist">스킨 미스트/수분 부스터</option>
+      <option value="skin_sun">선크림/자외선 차단</option>
+      <option value="makeup_base">메이크업 베이스(프라이머/파운데이션)</option>
+      <option value="makeup_fix">메이크업 픽서 스프레이</option>
+      <option value="makeup_oilcontrol">피지컨트롤/파우더</option>
+      <option value="other">기타</option>
+    </select>
+    <button type="button" class="remove-product-btn" title="삭제">✕</button>
+  </div>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
