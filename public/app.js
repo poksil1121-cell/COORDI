@@ -226,6 +226,10 @@ function showSelectedCity(city) {
   const box = el("selectedCity");
   box.hidden = false;
   box.textContent = `📍 선택된 지역: ${city.name}${city.country ? " · " + city.country : ""}`;
+
+  const mapEl = el("regionMiniMap");
+  mapEl.hidden = false;
+  createMiniMap(mapEl, city.latitude, city.longitude);
 }
 
 async function handleUseMyLocation() {
