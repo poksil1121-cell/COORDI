@@ -43,8 +43,8 @@ function computeSnowFx(w) {
 }
 
 const HAZE_TIERS = [
-  { min: 81, max: 151, tier: "bad", particleCount: 25, overlayOpacity: 0.15 },
-  { min: 151, max: Infinity, tier: "veryBad", particleCount: 45, overlayOpacity: 0.3 },
+  { min: 81, max: 151, tier: "bad", particleCount: 15, cloudCount: 2, overlayOpacity: 0.18 },
+  { min: 151, max: Infinity, tier: "veryBad", particleCount: 28, cloudCount: 3, overlayOpacity: 0.32 },
 ];
 
 function computeHazeFx(w) {
@@ -58,7 +58,7 @@ function computeHazeFx(w) {
 
 function computeFogFx(w) {
   if (!w || (w.code !== 45 && w.code !== 48)) return null;
-  return { bandCount: 3, opacity: 0.25 };
+  return { bandCount: 5, opacity: 0.25 };
 }
 
 function computeCloudFx(w) {
@@ -213,13 +213,21 @@ function renderSkyLayer(container, sky) {
   } else if (sky.type === "haze") {
     container.classList.add(sky.tint === "dust" ? "weather-fx--dust" : "weather-fx--fine");
     container.style.setProperty("--haze-opacity", sky.overlayOpacity);
+    for (let i = 0; i < sky.cloudCount; i++) {
+      const cloud = document.createElement("div");
+      cloud.className = "haze-cloud";
+      cloud.style.setProperty("--top", `${10 + i * 25}%`);
+      cloud.style.setProperty("--duration", `${randomBetween(22, 34).toFixed(2)}s`);
+      cloud.style.setProperty("--delay", `${(i * -8).toFixed(2)}s`);
+      container.appendChild(cloud);
+    }
     for (let i = 0; i < sky.particleCount; i++) {
       const particle = document.createElement("span");
       particle.className = "haze-particle";
       particle.style.setProperty("--left", `${Math.random() * 100}%`);
       particle.style.setProperty("--top", `${Math.random() * 100}%`);
-      particle.style.setProperty("--duration", `${randomBetween(6, 12).toFixed(2)}s`);
-      particle.style.setProperty("--delay", `${(Math.random() * -10).toFixed(2)}s`);
+      particle.style.setProperty("--duration", `${randomBetween(8, 16).toFixed(2)}s`);
+      particle.style.setProperty("--delay", `${(Math.random() * -14).toFixed(2)}s`);
       container.appendChild(particle);
     }
   } else if (sky.type === "fog") {
@@ -227,18 +235,21 @@ function renderSkyLayer(container, sky) {
     for (let i = 0; i < sky.bandCount; i++) {
       const band = document.createElement("div");
       band.className = "fog-band";
-      band.style.setProperty("--top", `${20 + i * 30}%`);
-      band.style.setProperty("--delay", `${i * -3}s`);
+      band.style.setProperty("--top", `${10 + i * 18}%`);
+      band.style.setProperty("--delay", `${(i * -2.4).toFixed(2)}s`);
+      band.style.setProperty("--band-opacity", (sky.opacity * (0.6 + i * 0.1)).toFixed(2));
       container.appendChild(band);
     }
   } else if (sky.type === "cloud") {
     for (let i = 0; i < sky.blobCount; i++) {
       const blob = document.createElement("div");
       blob.className = "cloud-blob";
-      blob.style.setProperty("--top", `${10 + i * 18}%`);
-      blob.style.setProperty("--opacity", sky.opacity);
-      blob.style.setProperty("--duration", `${randomBetween(18, 28).toFixed(2)}s`);
-      blob.style.setProperty("--delay", `${(i * -6).toFixed(2)}s`);
+      const depth = i / Math.max(1, sky.blobCount - 1);
+      blob.style.setProperty("--top", `${8 + i * 16}%`);
+      blob.style.setProperty("--opacity", (sky.opacity * (1 - depth * 0.4)).toFixed(2));
+      blob.style.setProperty("--scale", (1 - depth * 0.3).toFixed(2));
+      blob.style.setProperty("--duration", `${randomBetween(20, 34).toFixed(2)}s`);
+      blob.style.setProperty("--delay", `${(i * -7).toFixed(2)}s`);
       container.appendChild(blob);
     }
   } else if (sky.type === "sun") {

@@ -70,8 +70,8 @@ test("computeHazeFx grades bad/veryBad by pm10 and tints by dust", () => {
 
 test("computeFogFx returns null unless weather code is 45 or 48", () => {
   assert.equal(computeFogFx({ code: 1 }), null);
-  assert.equal(computeFogFx({ code: 45 }).bandCount, 3);
-  assert.equal(computeFogFx({ code: 48 }).bandCount, 3);
+  assert.equal(computeFogFx({ code: 45 }).bandCount, 5);
+  assert.equal(computeFogFx({ code: 48 }).bandCount, 5);
 });
 
 test("computeCloudFx grades by weather code 2 vs 3, null otherwise", () => {
