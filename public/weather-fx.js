@@ -42,6 +42,32 @@ function computeSnowFx(w) {
   return SNOW_TIERS.find((t) => sum <= t.max);
 }
 
+const HAZE_TIERS = [
+  { min: 81, max: 151, tier: "bad", particleCount: 25, overlayOpacity: 0.15 },
+  { min: 151, max: Infinity, tier: "veryBad", particleCount: 45, overlayOpacity: 0.3 },
+];
+
+function computeHazeFx(w) {
+  if (!w) return null;
+  const pm10 = w.pm10 || 0;
+  const dust = w.dust || 0;
+  if (pm10 < 81 && dust < 40) return null;
+  const matched = HAZE_TIERS.find((t) => pm10 >= t.min && pm10 < t.max) || HAZE_TIERS[0];
+  return { ...matched, tint: dust >= 40 ? "dust" : "fine" };
+}
+
+function computeFogFx(w) {
+  if (!w || (w.code !== 45 && w.code !== 48)) return null;
+  return { bandCount: 3, opacity: 0.25 };
+}
+
+function computeCloudFx(w) {
+  if (!w) return null;
+  if (w.code === 3) return { blobCount: 4, opacity: 0.22 };
+  if (w.code === 2) return { blobCount: 2, opacity: 0.14 };
+  return null;
+}
+
 const SUN_TIERS = [
   { min: 3, max: 6, tier: "moderate", pulseDuration: 3.5, rays: false, shimmer: false, warm: false },
   {
@@ -127,5 +153,13 @@ function renderWeatherFx(container, w) {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { computeRainFx, computeSunFx, computeHailFx, computeSnowFx };
+  module.exports = {
+    computeRainFx,
+    computeSunFx,
+    computeHailFx,
+    computeSnowFx,
+    computeHazeFx,
+    computeFogFx,
+    computeCloudFx,
+  };
 }

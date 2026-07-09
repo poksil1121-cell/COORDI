@@ -54,3 +54,28 @@ test("computeSnowFx buckets precipSum into light/moderate/heavy/blizzard tiers",
   assert.equal(computeSnowFx({ isSnowy: true, precipSum: 25 }).tier, "blizzard");
   assert.equal(computeSnowFx({ isSnowy: true, precipSum: 25 }).bright, true);
 });
+
+const { computeHazeFx, computeFogFx, computeCloudFx } = require("../public/weather-fx.js");
+
+test("computeHazeFx returns null when pm10 and dust are both low", () => {
+  assert.equal(computeHazeFx({ pm10: 40, dust: 5 }), null);
+});
+
+test("computeHazeFx grades bad/veryBad by pm10 and tints by dust", () => {
+  assert.equal(computeHazeFx({ pm10: 100, dust: 5 }).tier, "bad");
+  assert.equal(computeHazeFx({ pm10: 100, dust: 5 }).tint, "fine");
+  assert.equal(computeHazeFx({ pm10: 200, dust: 5 }).tier, "veryBad");
+  assert.equal(computeHazeFx({ pm10: 10, dust: 60 }).tint, "dust");
+});
+
+test("computeFogFx returns null unless weather code is 45 or 48", () => {
+  assert.equal(computeFogFx({ code: 1 }), null);
+  assert.equal(computeFogFx({ code: 45 }).bandCount, 3);
+  assert.equal(computeFogFx({ code: 48 }).bandCount, 3);
+});
+
+test("computeCloudFx grades by weather code 2 vs 3, null otherwise", () => {
+  assert.equal(computeCloudFx({ code: 1 }), null);
+  assert.equal(computeCloudFx({ code: 2 }).blobCount, 2);
+  assert.equal(computeCloudFx({ code: 3 }).blobCount, 4);
+});
