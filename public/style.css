@@ -509,3 +509,23 @@ main { flex: 1; padding: 8px 20px 40px; }
   .cards-grid { grid-template-columns: 1fr 1fr; }
   #outfitCard { grid-column: 1 / -1; }
 }
+
+/* ============================================================
+   날씨 패널 FX — 비
+   ============================================================ */
+.raindrop {
+  position: absolute;
+  left: var(--left);
+  top: -10%;
+  width: 1.5px;
+  height: 14%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.85));
+  opacity: var(--opacity);
+  transform: rotate(8deg);
+  animation: rainfall var(--duration) linear var(--delay) infinite;
+}
+
+@keyframes rainfall {
+  from { top: -10%; }
+  to { top: 110%; }
+}
