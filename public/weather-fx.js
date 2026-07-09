@@ -16,6 +16,32 @@ function computeRainFx(w) {
   return RAIN_TIERS.find((t) => sum <= t.max);
 }
 
+const HAIL_TIERS = [
+  { max: 1, tier: "light", count: 10, durMin: 2.4, durMax: 3.2, opMin: 0.4, opMax: 0.55, dark: false },
+  { max: 5, tier: "moderate", count: 20, durMin: 1.6, durMax: 2.2, opMin: 0.45, opMax: 0.6, dark: false },
+  { max: 15, tier: "heavy", count: 35, durMin: 1.0, durMax: 1.6, opMin: 0.5, opMax: 0.65, dark: false },
+  { max: Infinity, tier: "severe", count: 55, durMin: 0.6, durMax: 1.0, opMin: 0.55, opMax: 0.7, dark: true },
+];
+
+function computeHailFx(w) {
+  if (!w || (w.code !== 96 && w.code !== 99)) return null;
+  const sum = Math.max(0, w.precipSum || 0);
+  return HAIL_TIERS.find((t) => sum <= t.max);
+}
+
+const SNOW_TIERS = [
+  { max: 1, tier: "light", count: 20, durMin: 5, durMax: 7, opMin: 0.5, opMax: 0.7, bright: false },
+  { max: 5, tier: "moderate", count: 40, durMin: 4, durMax: 5.5, opMin: 0.55, opMax: 0.75, bright: false },
+  { max: 15, tier: "heavy", count: 70, durMin: 3, durMax: 4.5, opMin: 0.6, opMax: 0.8, bright: false },
+  { max: Infinity, tier: "blizzard", count: 110, durMin: 2, durMax: 3.5, opMin: 0.65, opMax: 0.85, bright: true },
+];
+
+function computeSnowFx(w) {
+  if (!w || !w.isSnowy) return null;
+  const sum = Math.max(0, w.precipSum || 0);
+  return SNOW_TIERS.find((t) => sum <= t.max);
+}
+
 const SUN_TIERS = [
   { min: 3, max: 6, tier: "moderate", pulseDuration: 3.5, rays: false, shimmer: false, warm: false },
   {
@@ -101,5 +127,5 @@ function renderWeatherFx(container, w) {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { computeRainFx, computeSunFx };
+  module.exports = { computeRainFx, computeSunFx, computeHailFx, computeSnowFx };
 }
