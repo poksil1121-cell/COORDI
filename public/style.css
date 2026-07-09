@@ -529,3 +529,60 @@ main { flex: 1; padding: 8px 20px 40px; }
   from { top: -10%; }
   to { top: 110%; }
 }
+
+/* ============================================================
+   날씨 패널 FX — 햇빛 · 자외선
+   ============================================================ */
+.sun-glow {
+  position: absolute;
+  top: 12%;
+  right: 10%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 120, 0.55), transparent 70%);
+  animation: sunPulse var(--pulse-duration) ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+.sun-rays {
+  position: absolute;
+  top: 12%;
+  right: 10%;
+  width: 90px;
+  height: 90px;
+  background: conic-gradient(from 0deg, transparent 0 10%, rgba(255, 214, 120, 0.35) 12%, transparent 14% 100%);
+  animation: sunRotate var(--rotate-duration) linear infinite;
+}
+
+@keyframes sunRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.heat-shimmer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40%;
+  background: repeating-linear-gradient(to right, transparent 0, rgba(255, 255, 255, 0.08) 8px, transparent 16px);
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+.heat-shimmer--light { opacity: 0.35; animation-duration: 3s; }
+.heat-shimmer--heavy { opacity: 0.55; animation-duration: 1.6s; }
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(0) skewX(0deg); }
+  50% { transform: translateX(6px) skewX(1.5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raindrop, .sun-glow, .sun-rays, .heat-shimmer {
+    animation: none !important;
+  }
+}
