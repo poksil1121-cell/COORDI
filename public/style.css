@@ -994,3 +994,21 @@ main { flex: 1; padding: 8px 20px 40px; }
   font-weight: 600;
   color: var(--ink-soft);
 }
+
+.coming-soon-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff3d6;
+  color: #8a6100;
+  font-size: 0.68rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.coming-soon-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
