@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
 
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /**
@@ -96,6 +96,101 @@ function buildUserMessage(profile, weather, rules) {
     '[규칙 기반 추천 결과]',
     JSON.stringify(rules, null, 2),
   ].join('\n');
+}
+
+/**
+ * 사용자가 올린 의상 사진 한 장을 Claude에게 보내 카테고리·색상·스타일을
+ * 분석해서 돌려주는 엔드포인트.
+ *
+ * - ANTHROPIC_API_KEY가 없으면 /api/recommend와 동일하게 안내 메시지만 반환하고
+ *   앱의 나머지 기능에는 영향이 없습니다.
+ * - 이미지는 서버에 저장하지 않고 분석 요청 때만 경유합니다.
+ */
+app.post('/api/analyze-clothing', async (req, res) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey || apiKey.includes('여기에-발급받은-키')) {
+    return res.status(400).json({
+      error:
+        'ANTHROPIC_API_KEY가 설정되지 않았어요. 프로젝트 루트에 .env 파일을 만들고 API 키를 추가한 뒤 서버를 다시 시작해주세요.',
+    });
+  }
+
+  const { imageBase64, mediaType } = req.body || {};
+  if (!imageBase64 || !mediaType) {
+    return res.status(400).json({ error: '분석할 이미지가 없어요.' });
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 300,
+        system: buildClothingAnalysisPrompt(),
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
+              { type: 'text', text: '이 옷 사진을 분석해서 JSON으로만 응답해주세요.' },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Anthropic API 오류:', response.status, errText);
+      return res.status(502).json({ error: '의상 분석 중 문제가 발생했어요. API 키와 모델명을 확인해주세요.' });
+    }
+
+    const data = await response.json();
+    const text = (data.content || [])
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('\n')
+      .trim();
+
+    const parsed = parseClothingAnalysis(text);
+    if (!parsed) {
+      return res.status(502).json({ error: '사진에서 의상 정보를 읽지 못했어요. 다른 사진으로 시도해주세요.' });
+    }
+
+    res.json(parsed);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버에서 예상치 못한 오류가 발생했어요.' });
+  }
+});
+
+function buildClothingAnalysisPrompt() {
+  return `당신은 옷 사진을 분석하는 패션 분류기입니다.
+사용자가 올린 의상 사진 한 장을 보고 아래 JSON 형식으로만 응답하세요. 다른 설명, 마크다운, 코드블록 없이 순수 JSON 객체 하나만 출력하세요.
+
+{"category": "top|bottom|socks|shoes|outer 중 하나", "color": "대표 색상(한글, 1~2단어)", "style": "제품 종류를 짧게 설명하는 한글 문구(예: 오버사이즈 후드 집업)"}
+
+사진에 옷이 여러 개 보이면 가장 크게 보이는 하나만 분석하세요. 확신이 없어도 가장 가까운 카테고리를 고르세요.`;
+}
+
+function parseClothingAnalysis(text) {
+  try {
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    const obj = JSON.parse(jsonMatch[0]);
+    const validCategories = ['top', 'bottom', 'socks', 'shoes', 'outer'];
+    if (!validCategories.includes(obj.category)) return null;
+    if (!obj.color || !obj.style) return null;
+    return { category: obj.category, color: String(obj.color), style: String(obj.style) };
+  } catch {
+    return null;
+  }
 }
 
 app.listen(PORT, () => {
