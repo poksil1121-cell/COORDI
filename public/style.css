@@ -1054,6 +1054,7 @@ main { flex: 1; padding: 8px 20px 40px; }
 }
 .outfit-table-row {
   display: flex;
+  align-items: center;
   gap: 10px;
   padding: 6px 0;
   font-size: 0.85rem;
@@ -1064,6 +1065,21 @@ main { flex: 1; padding: 8px 20px 40px; }
   flex: 0 0 44px;
   font-weight: 600;
   color: var(--ink-soft);
+}
+.outfit-table-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+
+.outfit-table-hint {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
 }
 
 .coming-soon-badge {

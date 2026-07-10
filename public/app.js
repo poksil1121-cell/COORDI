@@ -1383,7 +1383,7 @@ function wardrobeOption(profile, category, occasion) {
   const keywords = occasion && occasion.type ? OCCASION_WARDROBE_KEYWORDS[occasion.type] : null;
   const matched = keywords ? items.filter((item) => keywords.some((k) => item.style.includes(k))) : [];
   const item = pickRandom(matched.length > 0 ? matched : items);
-  return { text: `${item.style} · ${item.color}`, fromWardrobe: true };
+  return { text: `${item.style} · ${item.color}`, fromWardrobe: true, imageDataUrl: item.imageDataUrl };
 }
 
 function buildOutfitTable(profile, w, occasion) {
@@ -1409,7 +1409,7 @@ function buildOutfitTable(profile, w, occasion) {
   let shoesText = shoesOption.text;
   if (w.isRainy) shoesText += " (방수 소재 추천)";
   if (w.isSnowy) shoesText += " (미끄럼 방지 밑창 추천)";
-  const shoes = { text: shoesText, fromWardrobe: shoesOption.fromWardrobe };
+  const shoes = { text: shoesText, fromWardrobe: shoesOption.fromWardrobe, imageDataUrl: shoesOption.imageDataUrl };
 
   return { top, bottom, socks, shoes };
 }
@@ -1487,9 +1487,11 @@ function renderRecommendationCards(rules) {
 }
 
 function outfitRowHtml(label, entry) {
+  const thumb = entry.fromWardrobe && entry.imageDataUrl ? `<img src="${entry.imageDataUrl}" alt="${label}" class="outfit-table-thumb" />` : "";
   return `
     <div class="outfit-table-row">
       <span class="outfit-table-label">${label}</span>
+      ${thumb}
       <span>${entry.text}${entry.fromWardrobe ? ' <span class="wardrobe-badge">내 옷</span>' : ""}</span>
     </div>
   `;
