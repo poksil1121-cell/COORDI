@@ -38,6 +38,7 @@
           <span class="step-dot" data-step="2"></span>
           <span class="step-dot" data-step="3"></span>
           <span class="step-dot" data-step="4"></span>
+          <span class="step-dot" data-step="5"></span>
         </div>
 
         <!-- STEP 1 : 기본 정보 -->
@@ -113,6 +114,17 @@
             </select>
           </label>
 
+          <div class="wizard-actions">
+            <button type="button" class="btn btn-ghost" data-prev="1">이전</button>
+            <button type="button" class="btn btn-primary" data-next="3">다음</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 : 코디 스타일 -->
+        <div class="wizard-step" data-step="3">
+          <h2>코디 스타일을 알려주세요</h2>
+          <p class="step-desc">평소 즐겨 입는 스타일에 맞춰 코디를 추천해드려요.</p>
+
           <label class="field">
             <span>코디 스타일</span>
             <select id="styleTypeInput">
@@ -129,13 +141,13 @@
           <input type="text" id="customStyleInput" class="style-custom-input" placeholder="스타일 직접 입력 (예: 고프코어)" hidden />
 
           <div class="wizard-actions">
-            <button type="button" class="btn btn-ghost" data-prev="1">이전</button>
-            <button type="button" class="btn btn-primary" data-next="3">다음</button>
+            <button type="button" class="btn btn-ghost" data-prev="2">이전</button>
+            <button type="button" class="btn btn-primary" data-next="4">다음</button>
           </div>
         </div>
 
-        <!-- STEP 3 : 보유 제품 -->
-        <div class="wizard-step" data-step="3">
+        <!-- STEP 4 : 보유 제품 -->
+        <div class="wizard-step" data-step="4">
           <h2>가지고 있는 제품을 알려주세요</h2>
           <p class="step-desc">등록해두면 상황에 맞을 때 해당 제품으로 구체적으로 추천해드려요. 없으면 건너뛰어도 괜찮아요 — 필요한 제품 종류를 대신 제안해드릴게요.</p>
 
@@ -144,19 +156,19 @@
           <p class="product-disclaimer">제품 정보는 참고용 요약이며, 정확한 성분은 제품 패키지나 판매처에서 확인해주세요.</p>
 
           <div class="wizard-actions">
-            <button type="button" class="btn btn-ghost" data-prev="2">이전</button>
-            <button type="button" class="btn btn-primary" data-next="4">다음</button>
+            <button type="button" class="btn btn-ghost" data-prev="3">이전</button>
+            <button type="button" class="btn btn-primary" data-next="5">다음</button>
           </div>
         </div>
 
-        <!-- STEP 4 : 완료 -->
-        <div class="wizard-step" data-step="4">
+        <!-- STEP 5 : 완료 -->
+        <div class="wizard-step" data-step="5">
           <h2>준비됐어요</h2>
           <p class="step-desc">입력하신 정보는 이 기기에만 저장되고, 언제든 설정에서 수정할 수 있어요.</p>
           <div id="summaryBox" class="summary-box"></div>
 
           <div class="wizard-actions">
-            <button type="button" class="btn btn-ghost" data-prev="3">이전</button>
+            <button type="button" class="btn btn-ghost" data-prev="4">이전</button>
             <button type="button" class="btn btn-primary" id="finishOnboarding">오늘의 코디 보기</button>
           </div>
         </div>

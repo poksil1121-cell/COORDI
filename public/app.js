@@ -161,7 +161,7 @@ function renderStep() {
     dot.classList.toggle("active", n === currentStep);
     dot.classList.toggle("done", n < currentStep);
   });
-  if (currentStep === 4) renderSummary();
+  if (currentStep === 5) renderSummary();
 }
 
 function bindOnboardingEvents() {
