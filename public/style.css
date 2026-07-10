@@ -395,6 +395,41 @@ main { flex: 1; padding: 8px 20px 40px; }
   background: rgba(255, 255, 255, 0.16);
 }
 
+.forecast-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 0.68rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.target-date-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.target-date-field span {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+.target-date-field input[type="date"] {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 0.8rem;
+  color-scheme: dark;
+}
+.target-date-field input[type="date"]:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 1px;
+}
+
 .weather-temp {
   display: flex;
   align-items: flex-end;

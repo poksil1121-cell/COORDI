@@ -60,6 +60,7 @@ let selectedCity = null; // {name, latitude, longitude, country}
 let lastWeather = null;
 let lastRules = null;
 let currentOccasion = { type: null, custom: "" };
+let targetDate = null; // null = 오늘(실시간), 그 외엔 "YYYY-MM-DD" 예보 날짜
 
 // ============================================================
 // DOM 참조
@@ -496,6 +497,7 @@ function bindDashboardEvents() {
     profile = null;
     selectedCity = null;
     currentOccasion = { type: null, custom: "" };
+    targetDate = null;
     el("occasionInput").value = "";
     el("customOccasionInput").hidden = true;
     el("customOccasionInput").value = "";
@@ -566,6 +568,12 @@ async function showDashboard() {
     greetingEl.hidden = true;
   }
 
+  await loadWeatherForDate(targetDate);
+}
+
+async function loadWeatherForDate(dateStr) {
+  targetDate = dateStr || null;
+
   el("cardsGrid").hidden = true;
   el("aiSection").hidden = true;
   el("weatherPanel").innerHTML = `<div class="weather-loading" id="weatherLoading">날씨를 불러오는 중이에요…</div>`;
@@ -576,7 +584,7 @@ async function showDashboard() {
   }
 
   try {
-    const weather = await fetchWeather(profile.region.latitude, profile.region.longitude);
+    const weather = await fetchWeather(profile.region.latitude, profile.region.longitude, targetDate);
     lastWeather = weather;
     renderWeatherPanel(weather);
 
@@ -596,46 +604,57 @@ async function showDashboard() {
 }
 
 // ── 날씨 조회 ────────────────────────────────────────────
-async function fetchWeather(lat, lon) {
+// dateStr(YYYY-MM-DD)을 주면 그날의 예보로, 생략하면 오늘의 실시간 관측치로 계산해요.
+// Open-Meteo 무료 예보는 최대 16일치까지 제공돼요.
+async function fetchWeather(lat, lon, dateStr) {
+  const forecastDays = dateStr ? 16 : 1;
   const weatherUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code` +
-    `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max,weather_code` +
-    `&timezone=auto&forecast_days=1`;
+    `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max,weather_code,relative_humidity_2m_mean` +
+    `&timezone=auto&forecast_days=${forecastDays}`;
   const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,dust&timezone=auto`;
 
   const [weatherRes, airRes] = await Promise.all([fetch(weatherUrl), fetch(airUrl).catch(() => null)]);
   if (!weatherRes.ok) throw new Error("weather fetch failed");
   const data = await weatherRes.json();
 
+  let dayIndex = 0;
+  if (dateStr && Array.isArray(data.daily?.time)) {
+    const idx = data.daily.time.indexOf(dateStr);
+    if (idx >= 0) dayIndex = idx;
+  }
+
   let air = {};
-  if (airRes && airRes.ok) {
+  if (dayIndex === 0 && airRes && airRes.ok) {
     const airData = await airRes.json();
     air = airData.current || {};
   }
 
-  return classifyWeather(data, air);
+  return classifyWeather(data, air, dayIndex);
 }
 
-function classifyWeather(data, air) {
-  const cur = data.current || {};
+function classifyWeather(data, air, dayIndex = 0) {
   const daily = data.daily || {};
+  const cur = dayIndex === 0 ? data.current || {} : {};
   const airCur = air || {};
 
-  const humidity = cur.relative_humidity_2m ?? 50;
-  const tempNow = cur.temperature_2m ?? 20;
-  const tempMax = daily.temperature_2m_max?.[0] ?? tempNow;
-  const tempMin = daily.temperature_2m_min?.[0] ?? tempNow;
+  const tempMax = daily.temperature_2m_max?.[dayIndex] ?? cur.temperature_2m ?? 20;
+  const tempMin = daily.temperature_2m_min?.[dayIndex] ?? cur.temperature_2m ?? tempMax;
+  const humidity = cur.relative_humidity_2m ?? daily.relative_humidity_2m_mean?.[dayIndex] ?? 50;
+  const tempNow = dayIndex === 0 ? cur.temperature_2m ?? tempMax : Math.round(((tempMax + tempMin) / 2) * 10) / 10;
   const windNow = cur.wind_speed_10m ?? 0;
-  const windMax = daily.wind_speed_10m_max?.[0] ?? windNow;
+  const windMax = daily.wind_speed_10m_max?.[dayIndex] ?? windNow;
   const wind = Math.max(windNow, windMax);
-  const precipProb = daily.precipitation_probability_max?.[0] ?? 0;
-  const precipSum = daily.precipitation_sum?.[0] ?? 0;
-  const uv = daily.uv_index_max?.[0] ?? 0;
-  const code = cur.weather_code ?? daily.weather_code?.[0] ?? 0;
+  const precipProb = daily.precipitation_probability_max?.[dayIndex] ?? 0;
+  const precipSum = daily.precipitation_sum?.[dayIndex] ?? 0;
+  const uv = daily.uv_index_max?.[dayIndex] ?? 0;
+  const code = cur.weather_code ?? daily.weather_code?.[dayIndex] ?? 0;
   const pm10 = airCur.pm10 ?? 0;
   const pm2_5 = airCur.pm2_5 ?? 0;
   const dust = airCur.dust ?? 0;
+  const resolvedDate = Array.isArray(daily.time) ? daily.time[dayIndex] : null;
+  const isForecast = dayIndex > 0;
 
   const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
   const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -693,6 +712,8 @@ function classifyWeather(data, air) {
     isCloudy,
     tempBand,
     theme,
+    resolvedDate,
+    isForecast,
   };
 }
 
@@ -714,11 +735,30 @@ function applyTheme(themeKey) {
   brandMark.innerHTML = BRAND_ICONS[themeKey] || BRAND_ICONS.default;
 }
 
+function todayISODate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function addDaysISO(dateStr, days) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d + days);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatDateLabel(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+}
+
 function renderWeatherPanel(w) {
   applyTheme(w.theme);
 
-  const today = new Date();
-  const dateStr = today.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+  const resolvedDate = w.resolvedDate || todayISODate();
+  const dateStr = formatDateLabel(resolvedDate);
+  const minDate = todayISODate();
+  const maxDate = addDaysISO(minDate, 15);
 
   el("weatherPanel").innerHTML = `
     <div class="weather-fx" id="weatherFx"></div>
@@ -726,10 +766,15 @@ function renderWeatherPanel(w) {
       <div class="weather-head">
         <div>
           <p class="weather-location">📍 ${profile.region.name}</p>
-          <p class="weather-date">${dateStr}</p>
+          <p class="weather-date">${dateStr}${w.isForecast ? ' <span class="forecast-badge">예보</span>' : ""}</p>
         </div>
         <span class="weather-condition">${TEMP_BAND_LABEL[w.tempBand]}${w.isRainy ? " · 비" : ""}${w.isSnowy ? " · 눈" : ""}</span>
       </div>
+
+      <label class="target-date-field">
+        <span>코디 예보 날짜</span>
+        <input type="date" id="targetDateInput" value="${resolvedDate}" min="${minDate}" max="${maxDate}" />
+      </label>
 
       <div class="weather-temp">
         <span class="now">${Math.round(w.tempNow)}°</span>
@@ -747,6 +792,12 @@ function renderWeatherPanel(w) {
     </div>
   `;
 
+  el("targetDateInput").addEventListener("change", (e) => {
+    const val = e.target.value;
+    if (!val) return;
+    loadWeatherForDate(val === todayISODate() ? null : val);
+  });
+
   renderWeatherFx(el("weatherFx"), w);
   createMiniMap(el("dashboardMiniMap"), profile.region.latitude, profile.region.longitude, () => {
     openMapExplorer(profile.region.latitude, profile.region.longitude, {
@@ -755,7 +806,7 @@ function renderWeatherPanel(w) {
         const name = await reverseGeocode(lat, lon);
         profile.region = { name, latitude: lat, longitude: lon, country: "" };
         saveProfile(profile);
-        showDashboard();
+        loadWeatherForDate(targetDate);
       },
     });
   });
